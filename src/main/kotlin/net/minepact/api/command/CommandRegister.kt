@@ -3,6 +3,7 @@ package net.minepact.api.command
 import net.minepact.Main
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.parseArgument
+import net.minepact.api.messages.send
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
 import org.bukkit.command.CommandMap
@@ -24,12 +25,12 @@ class CommandRegister {
                 args: Array<String>
             ): Boolean {
                 if (!sender.hasPermission(command.permission)) {
-                    sender.sendMessage("<red>You do not have permission to execute this command.")
+                    sender.send("<red>You do not have permission to execute this command.")
                     return true
                 }
 
                 if (command.playerOnly && sender !is org.bukkit.entity.Player) {
-                    sender.sendMessage("<red>This command can only be used by players.")
+                    sender.send("<red>This command can only be used by players.")
                     return true
                 }
 
@@ -39,7 +40,7 @@ class CommandRegister {
                     val expectedArguments = command.chatComplete(index)
 
                     if (expectedArguments.isEmpty()) {
-                        sender.sendMessage("<red>Invalid arguments. Usage: ${command.usage}")
+                        sender.send("<red>Invalid arguments. Usage: ${command.usage}")
                         return true
                     }
                     val parsed = expectedArguments
@@ -47,7 +48,7 @@ class CommandRegister {
                         .filter { expected -> expected.senderFilter?.invoke(sender) ?: true }
                         .firstNotNullOfOrNull { expected -> parseArgument(args[index], expected) }
                     if (parsed == null) {
-                        sender.sendMessage("<red>Invalid arguments. Usage: ${command.usage}")
+                        sender.send("<red>Invalid arguments. Usage: ${command.usage}")
                         return true
                     }
 
@@ -55,7 +56,7 @@ class CommandRegister {
                 }
                 val missingRequired = command.chatComplete(parsedArgs.size).any { !it.optional }
                 if (missingRequired) {
-                    sender.sendMessage("<red>Invalid arguments. Usage: ${command.usage}")
+                    sender.send("<red>Invalid arguments. Usage: ${command.usage}")
                     return true
                 }
 
