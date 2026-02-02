@@ -1,0 +1,9 @@
+name: MinePact
+version: '0.1-DEV'
+main: net.minepact.Main
+api-version: '1.21'
+prefix: MinePact
+load: STARTUP
+authors: [dankenyon]
+description: The core plugin for the MinePact server.
+website: https://dev.minepact.net
