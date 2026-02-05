@@ -1,37 +1,29 @@
-package net.minepact.server.global
+package net.minepact.server.global.commands
 
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
+import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
-import java.util.Locale
-import java.util.Locale.getDefault
 
 class GameModeCommand : Command(
     name = "gamemode",
-    description = "Changes the players gamemode.",
+    description = "Changes the player's gamemode.",
     usage = CommandUsage(
         label = "gamemode",
         arguments = listOf(
-            ExpectedArgument(
-                potentialValues = listOf("survival", "creative", "adventure", "spectator"),
-                optional = false
-            ),
-            ExpectedArgument(
-                potentialValues = listOf("player"),
-                optional = true
-            ),
+            ExpectedArgument(name = "gamemode", dynamicProvider = Provider.GAMEMODES,),
+            ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS, optional = true),
         )
     ),
     permission = "minepact.command.gamemode",
     aliases = mutableListOf("gm"),
-    cooldown = 1.0,
+    cooldown = 5.0,
     playerOnly = true
 ) {
     override fun execute(
@@ -52,29 +44,5 @@ class GameModeCommand : Command(
             return Result.FAILURE
         }
         return Result.SUCCESS
-    }
-
-    override fun chatComplete(index: Int): MutableList<ExpectedArgument> {
-        return when (index) {
-            0 -> mutableListOf(
-                ExpectedArgument(
-                    potentialValues = listOf(),
-                    inputType = ArgumentInputType.STRING,
-                    dynamicProvider = {
-                        GameMode.entries.map { it.name.lowercase() }
-                    },
-                )
-            )
-            1 -> mutableListOf(
-                ExpectedArgument(
-                    potentialValues = listOf(),
-                    inputType = ArgumentInputType.STRING,
-                    dynamicProvider = {
-                        Bukkit.getOnlinePlayers().map { it.name }
-                    },
-                )
-            )
-            else -> mutableListOf()
-        }
     }
 }

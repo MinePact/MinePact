@@ -3,10 +3,8 @@ package net.minepact.api.command.arguments
 import org.bukkit.command.CommandSender
 
 class ExpectedArgument(
-    val potentialValues: List<String>,
-    var identifier: List<String> = potentialValues.map {
-        "<grey><italics><$it></italics></grey>"
-    },
+    val name: String,
+    var potentialValues: List<String>? = null,
     var inputType: ArgumentInputType = ArgumentInputType.STRING,
     var optional: Boolean = false,
     var range: ArgumentRange<*> = EmptyArgumentRange(),

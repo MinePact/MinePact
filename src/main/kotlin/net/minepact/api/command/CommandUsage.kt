@@ -8,8 +8,8 @@ class CommandUsage(
 ) {
     override fun toString(): String {
         return "/$label " + arguments.joinToString(" ") {
-            if (it.optional) "[${it.potentialValues.joinToString("|")}]"
-            else "<${it.potentialValues.joinToString("|")}>"
+            if (it.optional) "[${it.name}]"
+            else "<${it.name}>"
         }
     }
 }
