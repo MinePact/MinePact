@@ -1,4 +1,4 @@
-package net.minepact.server.global.events
+package net.minepact.core.global.events
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.api.event.EventContext

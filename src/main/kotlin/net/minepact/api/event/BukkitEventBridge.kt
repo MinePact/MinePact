@@ -13,7 +13,7 @@ class BukkitEventBridge(
     private val eventRegister: EventRegister
 ) : Listener {
     fun registerAllEvents() {
-        val eventClasses = getAllBukkitEvents()
+        val eventClasses = getAllEvents()
         for (eventClass in eventClasses) {
             try {
                 if (Modifier.isAbstract(eventClass.modifiers)) continue
@@ -30,20 +30,22 @@ class BukkitEventBridge(
         }
     }
 
-    private fun getAllBukkitEvents(): List<Class<out Event>> {
+    private fun getAllEvents(): List<Class<out Event>> {
         val classes = mutableListOf<Class<out Event>>()
-        val packageName = "org.bukkit.event"
-        val basePath = packageName.replace('.', '/')
         val jarFile = JarFile(File(Bukkit::class.java.protectionDomain.codeSource.location.toURI()))
 
         jarFile.use { jar ->
             jar.entries().asSequence()
                 .filter { it.name.endsWith(".class") }
-                .filter { it.name.startsWith(basePath) }
+                .filter {
+                    it.name.startsWith("org/bukkit/event") ||
+                    it.name.startsWith("com/destroystokyo/paper/event")
+                }
                 .forEach { entry ->
                     val className = entry.name
                         .removeSuffix(".class")
                         .replace('/', '.')
+
                     try {
                         val clazz = Class.forName(className)
                         if (Event::class.java.isAssignableFrom(clazz) &&

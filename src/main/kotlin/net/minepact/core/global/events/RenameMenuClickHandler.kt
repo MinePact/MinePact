@@ -1,4 +1,4 @@
-package net.minepact.server.global.events
+package net.minepact.core.global.events
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -20,12 +20,7 @@ class RenameMenuClickHandler : SimpleEventHandler<InventoryClickEvent>() {
         val player = event.whoClicked
         val item = player.inventory.itemInMainHand
 
-        println(1)
-
         if (event.rawSlot == 2) {
-            println(2)
-
-            println(event.inventory.contents.toString())
             val newName: Component = event.view.topInventory.getItem(2)!!.itemMeta?.displayName() ?: return
 
             val meta = item.itemMeta
@@ -33,7 +28,6 @@ class RenameMenuClickHandler : SimpleEventHandler<InventoryClickEvent>() {
             item.itemMeta = meta
 
             player.closeInventory()
-            println(3)
         }
     }
 }

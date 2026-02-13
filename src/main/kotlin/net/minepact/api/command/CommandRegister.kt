@@ -4,6 +4,7 @@ import net.minepact.Main
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.parseArgument
 import net.minepact.api.messages.send
+import net.minepact.api.server.ServerType
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
 import org.bukkit.command.CommandMap
@@ -111,15 +112,17 @@ class CommandRegister {
             }
         }
 
-        getCommandMap().register(Main.instance.name.lowercase(), bukkitCommand)
-        COMMANDS.add(command)
-        Main.instance.logger.info("[CommandRegister] Registered ${command.javaClass.name}!")
+        if (command.server == Main.SERVER.type || command.server == ServerType.GLOBAL) {
+            this.getCommandMap().register(Main.instance.name.lowercase(), bukkitCommand)
+            COMMANDS.add(command)
+            Main.instance.logger.info("[CommandRegister] Registered ${command.javaClass.name}!")
+        }
     }
 
     fun all(): List<Command> = COMMANDS
     fun allNames(): List<String> = COMMANDS.map { it.name }
 
-    private fun getCommandMap(): CommandMap {
+    fun getCommandMap(): CommandMap {
         val field = Bukkit.getServer().javaClass.getDeclaredField("commandMap")
         field.isAccessible = true
         return field.get(Bukkit.getServer()) as CommandMap

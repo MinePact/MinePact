@@ -1,4 +1,4 @@
-package net.minepact.server.global.commands
+package net.minepact.core.global.commands
 
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
@@ -7,11 +7,13 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
+import net.minepact.api.server.ServerType
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 
 class GameModeCommand : Command(
+    server = ServerType.SURVIVAL,
     name = "gamemode",
     description = "Changes the player's gamemode.",
     usage = CommandUsage(
