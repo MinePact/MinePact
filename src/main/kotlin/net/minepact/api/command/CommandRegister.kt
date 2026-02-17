@@ -38,7 +38,6 @@ class CommandRegister {
                 }
 
                 val parsedArgs = mutableListOf<Argument<*>>()
-
                 for (index in args.indices) {
                     val expectedArguments = command.usage.arguments
 
@@ -70,7 +69,7 @@ class CommandRegister {
                     if (RAN_COMMANDS.contains(sender) && RAN_COMMANDS[sender]!!.contains(command)) {
                         val lastRan = RAN_COMMANDS[sender]!![command]!!
                         val cooldownMillis = (command.cooldown * 1000).toLong()
-                        if (System.currentTimeMillis() - lastRan < cooldownMillis) {
+                        if ((System.currentTimeMillis() - lastRan < cooldownMillis) && !sender.hasPermission("minepact.cooldown.bypass")) {
                             val timeLeft: Double = ((cooldownMillis - (System.currentTimeMillis() - lastRan)) / 1000.0)
                             sender.send("<red>You must wait $timeLeft seconds before using this command again.")
                             return true
@@ -79,6 +78,7 @@ class CommandRegister {
 
                     RAN_COMMANDS[sender] = RAN_COMMANDS.getOrDefault(sender, mutableMapOf())
                         .also { it[command] = System.currentTimeMillis() }
+                    if (command.log) Main.LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}")
                     command.execute(sender, parsedArgs) == Result.SUCCESS
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -107,12 +107,11 @@ class CommandRegister {
                     }
                     .filter { it.lowercase().startsWith(current) }
                     .distinct()
-                    .sorted()
                     .toMutableList()
             }
         }
 
-        if (command.server == Main.SERVER.type || command.server == ServerType.GLOBAL) {
+        if (command.server == Main.SERVER.info.type || command.server == ServerType.GLOBAL) {
             this.getCommandMap().register(Main.instance.name.lowercase(), bukkitCommand)
             COMMANDS.add(command)
             Main.instance.logger.info("[CommandRegister] Registered ${command.javaClass.name}!")

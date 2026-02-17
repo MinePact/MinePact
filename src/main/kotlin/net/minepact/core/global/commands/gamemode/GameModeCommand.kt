@@ -1,4 +1,4 @@
-package net.minepact.core.global.commands
+package net.minepact.core.global.commands.gamemode
 
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage

@@ -12,4 +12,4 @@ class ExpectedArgument(
     val permission: String? = null,
     val senderFilter: ((CommandSender) -> Boolean)? = null,
     val dynamicProvider: ((CommandSender) -> List<String>)? = null
-) {}
+)

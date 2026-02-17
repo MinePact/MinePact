@@ -21,7 +21,6 @@ class ConfigCommand : Command(
             ExpectedArgument(
                 name = "config",
                 potentialValues = ConfigurationRegistry.configs.keys.map<KClass<*>, String> { it.simpleName!! },
-
             )
         )
     ),
@@ -46,7 +45,19 @@ class ConfigCommand : Command(
 
         when (action.lowercase()) {
             "get" -> {
-                // TODO
+                super.usage = CommandUsage(
+                    label = usage.label,
+                    arguments = listOf(
+                        ExpectedArgument(name = "action", dynamicProvider = Provider.CONFIG_ACTIONS),
+                        ExpectedArgument(
+                            name = "config",
+                            potentialValues = ConfigurationRegistry.configs.keys.map<KClass<*>, String> { it.simpleName!! },
+                        ),
+                        ExpectedArgument(name = "value", dynamicProvider = Provider.EMPTY)
+                    )
+                )
+
+
             }
 
             "set" -> {

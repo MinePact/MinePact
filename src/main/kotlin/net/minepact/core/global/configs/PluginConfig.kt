@@ -3,6 +3,7 @@ package net.minepact.core.global.configs
 import net.minepact.api.config.AbstractConfigurationFile
 import net.minepact.api.config.Comment
 import net.minepact.api.config.ReloadableConfig
+import net.minepact.api.punishment.PunishmentModifiers
 
 class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig> {
     override val fileName = "config.yml"
@@ -10,17 +11,28 @@ class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig>
         /* TODO: Database reload logic */
     }
 
-    @Comment("The URL used for server updates.")
-    var webhookUrl: String? = null
+    var default_announcement_status_modifier: String = PunishmentModifiers.PUBLIC.name
+    var default_punishment_scope_modifier: String = PunishmentModifiers.LOCAL.name
 
-    @Comment("Jump Boost -> Crouch Jump Launch")
+    var webhookUrl: String = ""
+
     var jumpBoostPlayers: List<String> = emptyList()
-    var jumpBoostVelocity: Double = 2.5
+    var jumpBoostVelocity by persisting(2.5)
 
-    @Comment("Database Connection Information")
     var database: Database = Database()
+    var spawn by persisting(Spawn())
 
+    class Spawn {
+        var teleportOnJoin: Boolean = false
+        var world: String = "world"
+        var x: Double = 0.0
+        var y: Double = 64.0
+        var z: Double = 0.0
+        var yaw: Float = 0.0f
+        var pitch: Float = 0.0f
+    }
     class Database {
+        var provider: String = "MARIADB"
         @Comment("The ip to connect to")
         var host: String = "localhost"
         @Comment("The port to connect through")

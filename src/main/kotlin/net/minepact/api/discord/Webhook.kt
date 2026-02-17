@@ -11,12 +11,12 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 class Webhook(
+    var webhookUrl: String? = Main.MAIN_CONFIG.webhookUrl,
     val username: String,
     val avatarUrl: URL?,
 ) {
     fun sendMessage(content: String? = null, embeds: List<Embed> = emptyList()) {
         val json = formatAsJSON(content, embeds)
-        val webhookUrl: String? = Main.MAIN_CONFIG.webhookUrl
         if (webhookUrl.isNullOrBlank()) {
             val logger = try { Main.instance.logger } catch (_: Throwable) { null }
             if (logger != null) {
@@ -31,7 +31,7 @@ class Webhook(
             .connectTimeout(Duration.ofSeconds(5))
             .build()
         val request = HttpRequest.newBuilder()
-            .uri(URI.create(webhookUrl))
+            .uri(URI.create(webhookUrl!!))
             .header("Content-Type", "application/json")
             .timeout(Duration.ofSeconds(10))
             .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
@@ -42,15 +42,15 @@ class Webhook(
             if (response.statusCode() != 204) {
                 val logger = try { Main.instance.logger } catch (_: Throwable) { null }
                 if (logger != null) {
-                    logger.warning("Failed to send webhook: ${'$'}{response.statusCode()} ${'$'}{response.body()}")
+                    logger.warning($$"Failed to send webhook: ${response.statusCode()} ${response.body()}")
                 } else {
-                    println("Failed to send webhook: ${'$'}{response.statusCode()} ${'$'}{response.body()}")
+                    println($$"Failed to send webhook: ${response.statusCode()} ${response.body()}")
                 }
             }
         } catch (e: Exception) {
             val logger = try { Main.instance.logger } catch (_: Throwable) { null }
             if (logger != null) {
-                logger.severe("Failed to send webhook: ${'$'}{e.message}")
+                logger.severe($$"Failed to send webhook: ${e.message}")
             } else {
                 e.printStackTrace()
             }

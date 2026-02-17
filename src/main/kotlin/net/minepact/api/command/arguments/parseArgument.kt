@@ -22,6 +22,8 @@ fun parseArgument(
         is EmptyArgumentRange -> {}
     }
 
+    println("Parsed argument: input='$input', expectedType=${expected.inputType}, parsedValue=$parsed")
+
     return Argument(
         raw = input,
         value = parsed,

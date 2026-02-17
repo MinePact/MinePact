@@ -2,26 +2,35 @@ package net.minepact
 
 import net.minepact.api.command.CommandRegister
 import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.data.Database
+import net.minepact.api.data.DatabaseConfig
+import net.minepact.api.data.DatabaseFactory
+import net.minepact.api.data.DatabaseProvider
+import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.discord.Webhook
-import net.minepact.api.discord.embed.Author
-import net.minepact.api.discord.embed.Embed
-import net.minepact.api.discord.embed.Field
-import net.minepact.api.discord.embed.Footer
 import net.minepact.api.event.BukkitEventBridge
 import net.minepact.api.event.EventRegister
+import net.minepact.api.menu.MenuManager
+import net.minepact.api.misc.Constants
 import net.minepact.api.reflections.findCommands
 import net.minepact.api.reflections.findEvents
 import net.minepact.api.reflections.registerConfigs
+import net.minepact.api.schedular.EventSchedular
 import net.minepact.api.server.Server
-import net.minepact.core.global.configs.ServerConfig
+import net.minepact.core.discord.embeds.restartEmbed
+import net.minepact.core.discord.embeds.startEmbed
+import net.minepact.core.discord.embeds.stopEmbed
 import net.minepact.core.global.configs.PluginConfig
-import org.bukkit.plugin.java.JavaPlugin
+import net.minepact.core.global.configs.ServerConfig
+import net.minepact.core.global.events.timed.UpdateServerListEvent
+
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Date
+import kotlin.Boolean
+import kotlin.Long
 import kotlin.properties.Delegates
 
-class Main : JavaPlugin() {
+class Main : org.bukkit.plugin.java.JavaPlugin() {
     companion object {
         lateinit var instance: Main
         lateinit var COMMAND_REGISTRY: CommandRegister
@@ -30,6 +39,15 @@ class Main : JavaPlugin() {
         lateinit var MAIN_CONFIG: PluginConfig
         lateinit var SERVER: Server
 
+        lateinit var DATABASE_CONFIG: DatabaseConfig
+        lateinit var DATABASE: Database
+        lateinit var SERVER_REPOSITORY: ServerRepository
+        lateinit var PUNISHMENT_REPOSITORY: PunishmentRepository
+
+        lateinit var UPDATES_WEBHOOK: Webhook
+        lateinit var LOGGING_WEBHOOK: Webhook
+
+        var RESTARTING: Boolean = false
         var SERVER_START_TIME by Delegates.notNull<Long>()
     }
 
@@ -39,57 +57,51 @@ class Main : JavaPlugin() {
         EVENT_REGISTRY = EventRegister()
         SERVER_START_TIME = System.currentTimeMillis()
 
+        ConfigurationRegistry.register(PluginConfig::class)
         ConfigurationRegistry.register(ServerConfig::class)
+        MAIN_CONFIG = ConfigurationRegistry.get(PluginConfig::class)
+
+        DATABASE_CONFIG = DatabaseConfig(
+            type = DatabaseProvider.valueOf(MAIN_CONFIG.database.provider),
+            host = MAIN_CONFIG.database.host,
+            port = MAIN_CONFIG.database.port,
+            database = MAIN_CONFIG.database.name,
+            username = MAIN_CONFIG.database.username,
+            password = MAIN_CONFIG.database.password,
+            filePath = "mpdb.sqlite" // Fallback
+        )
+        DATABASE = DatabaseFactory.create(DATABASE_CONFIG)
+        SERVER_REPOSITORY = ServerRepository()
+        PUNISHMENT_REPOSITORY = PunishmentRepository()
+
         SERVER = Server()
+
+        UPDATES_WEBHOOK = Webhook(username = "Server Updates", avatarUrl = Constants.WEBHOOK_AVATAR_URL)
+        LOGGING_WEBHOOK = Webhook(
+            username = "Logger",
+            webhookUrl = "https://discord.com/api/webhooks/1472953480300990475/uWLQTkM7vykCRfUKAT1NYogeNLMFswZdEruu5mg-L3lskiLcroBMo_uqLo2xRPahGe65",
+            avatarUrl = Constants.WEBHOOK_AVATAR_URL
+        )
 
         findCommands("net.minepact.core").forEach { COMMAND_REGISTRY.register(it) }
         findEvents("net.minepact.core").forEach { EVENT_REGISTRY.register(it) }
-
         registerConfigs("net.minepact.core.global.configs")
-        MAIN_CONFIG = ConfigurationRegistry.get(PluginConfig::class)
 
-        val FORMATTED_START_TIME = SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Date(SERVER_START_TIME))
+        UPDATES_WEBHOOK.sendMessage("", listOf(startEmbed()))
 
-        Webhook("Server Updates", URL("https://www.balls.com/suck/my/balls"))
-            .sendMessage("", listOf(Embed(
-                author = Author(),
-                title = ":green_circle: Server Started",
-                url = null,
-                description = "${SERVER.name} has started!",
-                colour = 0x00FF00,
-                fields = listOf(
-                    Field("Name", SERVER.name, true),
-                    Field("Type", SERVER.type.name, true),
-                    Field("Staging", SERVER.staging.toString(), true)
-                ),
-                thumbnail = null,
-                image = null,
-                footer = Footer("Server UUID: ${SERVER.uuid} | Time: $FORMATTED_START_TIME")
-            )
-        ))
+        instance.logger.info("")
     }
 
     override fun onEnable() {
         BukkitEventBridge(EVENT_REGISTRY).registerAllEvents()
+
+        EventSchedular.startTimedEvent(UpdateServerListEvent())
+
+        MenuManager.initialize()
     }
 
     override fun onDisable() {
-        Webhook("Server Updates", URL("https://www.balls.com/suck/my/balls"))
-            .sendMessage("", listOf(Embed(
-                author = Author(),
-                title = ":red_circle: Server Stopped",
-                url = null,
-                description = "${SERVER.name} has stopped!",
-                colour = 0xFF0000,
-                fields = listOf(
-                    Field("Name", SERVER.name, true),
-                    Field("Type", SERVER.type.name, true),
-                    Field("Staging", SERVER.staging.toString(), true)
-                ),
-                thumbnail = null,
-                image = null,
-                footer = Footer("Server UUID: ${SERVER.uuid} | Time: ${SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Date(System.currentTimeMillis()))}")
-            )
-        ))
+        if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))
+        else UPDATES_WEBHOOK.sendMessage("", listOf(stopEmbed()))
     }
 }

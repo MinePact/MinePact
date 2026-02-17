@@ -6,15 +6,16 @@ import net.minepact.api.server.ServerType
 import org.bukkit.command.CommandSender
 
 abstract class Command(
-        val server: ServerType = ServerType.GLOBAL,
-        val name: String,
-        val description: String,
-        val permission: String,
-        val usage: CommandUsage,
-        var aliases: MutableList<String> = mutableListOf(),
-        var cooldown: Double = -1.0,
-        val playerOnly: Boolean = false,
-        val maxArgs: Int = Int.MAX_VALUE
+    val server: ServerType = ServerType.GLOBAL,
+    val name: String,
+    val description: String,
+    val permission: String,
+    var usage: CommandUsage,
+    var aliases: MutableList<String> = mutableListOf(),
+    var cooldown: Double = -1.0,
+    val playerOnly: Boolean = false,
+    val maxArgs: Int = Int.MAX_VALUE,
+    val log: Boolean = false,
 ) {
     protected val subCommands: MutableMap<String, SubCommand> = mutableMapOf()
 

@@ -20,6 +20,5 @@ abstract class SimpleEventHandler<E : Any>(
             ?.actualTypeArguments?.get(0) as? Class<E>)
             ?: ((this::class.java.genericSuperclass as? ParameterizedType)
                 ?.actualTypeArguments?.get(0) as Class<E>)
-            ?: throw IllegalStateException("Cannot infer event class for handler ${this::class.java.name}")
     }
 }

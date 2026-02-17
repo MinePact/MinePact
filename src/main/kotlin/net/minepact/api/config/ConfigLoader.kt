@@ -51,7 +51,7 @@ object ConfigLoader {
         val prefix = "  ".repeat(indent)
 
         for (prop in obj::class.memberProperties) {
-            if (prop !is KMutableProperty1<*, *>) continue
+            if (prop !is KMutableProperty1) continue
 
             val value = prop.getter.call(obj)
             val comment = prop.findAnnotation<Comment>()
@@ -78,7 +78,7 @@ object ConfigLoader {
         obj: Any
     ) {
         for (prop in obj::class.memberProperties) {
-            if (prop !is KMutableProperty1) continue
+            if (prop !is KMutableProperty1<*, *>) continue
 
             val key = if (path.isEmpty()) prop.name else "$path.${prop.name}"
             val current = prop.getter.call(obj)

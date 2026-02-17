@@ -5,7 +5,8 @@ enum class ArgumentInputType {
     STRING,
     BOOLEAN,
     DOUBLE,
-    FLOAT;
+    FLOAT,
+    LONG;
 
     fun parse(input: String): Any? = try {
         when (this) {
@@ -13,6 +14,7 @@ enum class ArgumentInputType {
             INTEGER -> input.toInt()
             DOUBLE -> input.toDouble()
             FLOAT -> input.toFloat()
+            LONG -> input.toLong()
             BOOLEAN -> input.equals("true", true) || input.equals("false", true)
         }
     } catch (e: Exception) {

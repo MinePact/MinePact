@@ -8,6 +8,6 @@ abstract class SubCommand(
     val name: String,
     val permission: String? = null
 ) {
-    abstract fun execute(sender: CommandSender, args: List<Argument<*>>)
-    abstract fun arguments(index: Int): List<ExpectedArgument>
+    abstract val usage: List<ExpectedArgument>
+    abstract fun execute(sender: CommandSender, args: List<Argument<*>>): Result
 }
