@@ -2,9 +2,12 @@ package net.minepact.core.global.events
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
+import net.minepact.api.config.ConfigurationRegistry
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.misc.formatDate
+import net.minepact.api.misc.formatDuration
+import net.minepact.core.global.configs.PunishmentConfig
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.event.player.PlayerJoinEvent
@@ -20,13 +23,20 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         val potentialPunishments = PUNISHMENT_REPOSITORY.findByTarget(event.player.name)
 
         potentialPunishments.get().forEach { punishment -> run {
-                if (System.currentTimeMillis() < punishment.expiresAt!!) {
-                    event.player.kick(MiniMessage.miniMessage().deserialize(
-                        "<dark_red>You cannot join this server!\n<red>You are banned!\n\nBanned By: <white>${punishment.issuerName}\n<red>Reason: <white>${punishment.reason}\n<red>Expires: <white>${formatDate(punishment.expiresAt)}",
-                    ), PlayerKickEvent.Cause.BANNED)
-                }
-            }
-        }
+            if (System.currentTimeMillis() > punishment.expiresAt!!) return
+            event.player.kick(MiniMessage.miniMessage().deserialize(
+                ConfigurationRegistry.get(PunishmentConfig::class).ban.kickMessage
+                    .joinToString { "\n" }
+                    .replace("{REASON}", punishment.reason)
+                    .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
+                    .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
+                    .replace("{TARGET}", punishment.targetName)
+                    .replace("{ISSUER}", punishment.issuerName)
+
+            ),
+                PlayerKickEvent.Cause.BANNED
+            )
+        } }
 
         if (Main.MAIN_CONFIG.spawn.teleportOnJoin) {
             event.player.teleport(Location(

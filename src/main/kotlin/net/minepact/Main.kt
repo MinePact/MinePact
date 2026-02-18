@@ -46,6 +46,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         lateinit var UPDATES_WEBHOOK: Webhook
         lateinit var LOGGING_WEBHOOK: Webhook
+        lateinit var PUNISHMENTS_WEBHOOK: Webhook
 
         var RESTARTING: Boolean = false
         var SERVER_START_TIME by Delegates.notNull<Long>()
@@ -80,6 +81,11 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         LOGGING_WEBHOOK = Webhook(
             username = "Logger",
             webhookUrl = "https://discord.com/api/webhooks/1472953480300990475/uWLQTkM7vykCRfUKAT1NYogeNLMFswZdEruu5mg-L3lskiLcroBMo_uqLo2xRPahGe65",
+            avatarUrl = Constants.WEBHOOK_AVATAR_URL
+        )
+        PUNISHMENTS_WEBHOOK = Webhook(
+            username = "Punishments",
+            webhookUrl = "https://discord.com/api/webhooks/1473475316713525283/eXnVM7gHRbw75g_5XtDVcWRqjXqr09uA2fazva72FpiG15kPIo0ZwPAaM6Ip4Isw4NXu",
             avatarUrl = Constants.WEBHOOK_AVATAR_URL
         )
 

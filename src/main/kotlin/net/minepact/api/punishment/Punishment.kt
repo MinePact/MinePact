@@ -10,7 +10,7 @@ class Punishment(
     val issuerName: String,
     val reason: String,
     val punishedAt: Long,
-    val expiresAt: Long?
+    val expiresAt: Long
 ) {
     companion object {
         fun generateId(): UUID {

@@ -5,6 +5,10 @@ import java.util.Date
 import java.util.TimeZone
 
 fun formatDuration(duration: Long): String {
+    if (duration == Long.MIN_VALUE) {
+        return "Infinity"
+    }
+
     if (duration <= 0) {
         return ""
     }
