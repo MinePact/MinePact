@@ -11,18 +11,16 @@ import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentModifiers
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.collections.first
 
 fun banEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Embed(
         author = Author(),
-        title = "${punishment.targetName} has been banned!",
+        title = "${punishment.targetName} has been banned",
         url = null,
-        description = "\n**Staff**: ${punishment.issuerName}\n**Reason**: ${punishment.reason}\n**Length**: ${
-            if (punishment.expiresAt == Long.MIN_VALUE) "Permanent" else formatDuration(punishment.expiresAt - System.currentTimeMillis())
-        }\n**Expires At**: ${formatDate(punishment.expiresAt)}\n**Modifiers**: ${modifiers[0]}, ${modifiers[1]}",
+        description = "\n**Target Server**: ${if (modifiers[0] != PunishmentModifiers.GLOBAL) Main.SERVER_REPOSITORY.findByUUID(punishment.targetServers.first()).get().first().name else "Network"}\n**Staff**: ${punishment.issuerName}\n**Reason**: ${punishment.reason}\n**Length**: ${if (punishment.expiresAt == Long.MIN_VALUE) "Permanent" else formatDuration(punishment.expiresAt - System.currentTimeMillis())}\n**Expires**: ${formatDate(punishment.expiresAt)}\n**Modifiers**: ${modifiers[0]}, ${modifiers[1]}",
         colour = 0xFF0000,
         fields = listOf(),
         thumbnail = null,
         image = null,
-        footer = Footer("Server UUID: ${SERVER.info.uuid} | Time: ${SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-            .format(Date(System.currentTimeMillis()))}")
+        footer = Footer("Server UUID: ${SERVER.info.uuid} | Time: ${SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Date(System.currentTimeMillis()))}")
     )
