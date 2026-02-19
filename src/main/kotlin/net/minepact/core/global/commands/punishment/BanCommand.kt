@@ -17,9 +17,18 @@ import net.minepact.api.misc.getLengthFromIdentifier
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentModifiers
 import net.minepact.api.punishment.PunishmentType
-import net.minepact.api.server.Server
 import net.minepact.api.server.ServerInfo
 import net.minepact.core.discord.embeds.punishments.banEmbed
+import net.minepact.core.discord.embeds.punishments.muteEmbed
+import net.minepact.core.global.commands.punishment.helper.createPunishment
+import net.minepact.core.global.commands.punishment.helper.extractRawTokens
+import net.minepact.core.global.commands.punishment.helper.message.getPunishmentBroadcast
+import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
+import net.minepact.core.global.commands.punishment.helper.parseLength
+import net.minepact.core.global.commands.punishment.helper.parseReason
+import net.minepact.core.global.commands.punishment.helper.resolveAnnouncementModifier
+import net.minepact.core.global.commands.punishment.helper.resolveScopeModifier
+import net.minepact.core.global.commands.punishment.helper.retrieveModifiers
 import net.minepact.core.global.configs.PunishmentConfig
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -35,7 +44,7 @@ class BanCommand : Command( // /ban <player> 1d Ban Evasion -s
     permission = "minepact.punishments.ban",
     aliases = mutableListOf(),
     usage = CommandUsage(
-        label = "restart", arguments = listOf(
+        label = "ban", arguments = listOf(
             ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS),
             ExpectedArgument(
                 name = "length",
@@ -53,71 +62,40 @@ class BanCommand : Command( // /ban <player> 1d Ban Evasion -s
         sender: CommandSender,
         args: MutableList<Argument<*>>
     ): Result {
-        val messageLines = ConfigurationRegistry.get(PunishmentConfig::class).ban.kickMessage.toString().replace("[", "").replace("]", "").replace(", ", "\n")
+        val targetName: String = args[0].value as String
+        val target: Player? = Bukkit.getPlayer(targetName)
 
-        val playerName: String = args[0].value as String
-        val rawTokens: MutableList<String> = if (args.size > 1) args.drop(1).map { it.value as String }.toMutableList() else mutableListOf()
+        val rawTokens: MutableList<String> = extractRawTokens(args)
+        val modifiers = retrieveModifiers(rawTokens)
 
-        val modifiers: MutableList<PunishmentModifiers> = mutableListOf()
-        val tokenIterator = rawTokens.listIterator()
-        while (tokenIterator.hasNext()) {
-            val token = tokenIterator.next()
-            val found = PunishmentModifiers.entries.firstOrNull { mod -> mod.possibleIdentifiers.contains(token) }
-            if (found != null) {
-                modifiers.add(found)
-                tokenIterator.remove()
-            }
-        }
+        val (_, expiresAt) = parseLength(rawTokens)
+        val reason = parseReason(rawTokens)
 
-        var lengthToken: String? = null
-        val lengthIndex = rawTokens.indexOfFirst { tok ->
-                    tok.equals("permanent", ignoreCase = true) ||
-                    tok.matches(Regex("^\\d+[smhdwy]$"))
-        }
-        if (lengthIndex >= 0) lengthToken = rawTokens.removeAt(lengthIndex)
-        val length: String = lengthToken ?: "permanent"
-        val expiresAt: Long = if (length.equals("permanent", ignoreCase = true)) Long.MIN_VALUE else try {
-            System.currentTimeMillis() + getLengthFromIdentifier(length)
-        } catch (_: Exception) { Long.MIN_VALUE }
+        val scope = resolveScopeModifier(modifiers)
+        val announcement = resolveAnnouncementModifier(modifiers)
 
-        val reason: String = if (rawTokens.isNotEmpty()) rawTokens.joinToString(" ") else "No reason provided."
-
-        val punishmentScope: PunishmentModifiers = if (modifiers.contains(PunishmentModifiers.GLOBAL) && modifiers.contains(PunishmentModifiers.LOCAL))
-            PunishmentModifiers.valueOf(Main.MAIN_CONFIG.default_punishment_scope_modifier)
-        else if (modifiers.contains(PunishmentModifiers.GLOBAL)) PunishmentModifiers.GLOBAL
-        else if (modifiers.contains(PunishmentModifiers.LOCAL)) PunishmentModifiers.LOCAL
-        else PunishmentModifiers.valueOf(Main.MAIN_CONFIG.default_punishment_scope_modifier)
-
-        val announcementStatus: PunishmentModifiers = if (modifiers.contains(PunishmentModifiers.SILENT) && modifiers.contains(PunishmentModifiers.PUBLIC))
-            PunishmentModifiers.valueOf(Main.MAIN_CONFIG.default_announcement_status_modifier)
-        else if (modifiers.contains(PunishmentModifiers.SILENT)) PunishmentModifiers.SILENT
-        else if (modifiers.contains(PunishmentModifiers.PUBLIC)) PunishmentModifiers.PUBLIC
-        else PunishmentModifiers.valueOf(Main.MAIN_CONFIG.default_announcement_status_modifier)
-
-        val servers: List<ServerInfo> = if (punishmentScope == PunishmentModifiers.GLOBAL) Main.SERVER_REPOSITORY.findAll().get()
-                                        else listOf(Main.SERVER.info)
-        val serverUUIDs: List<UUID> = servers.map { it.uuid }
-        val punishment = Punishment(
-            id = Punishment.generateId(),
-            targetServers = serverUUIDs,
-            type = PunishmentType.BAN ,
-            targetName = playerName,
-            issuerName = sender.name,
+        val punishment = createPunishment(
+            sender = sender,
+            type = PunishmentType.BAN,
+            targetName = targetName,
             reason = reason,
-            punishedAt = System.currentTimeMillis(),
-            expiresAt = expiresAt
+            expiresAt = expiresAt,
+            scope = scope
         )
 
         Main.PUNISHMENT_REPOSITORY.insert(punishment)
-        val target: Player? = Bukkit.getPlayer(playerName)
-        target?.kick(MiniMessage.miniMessage().deserialize(messageLines
-            .replace("{REASON}", punishment.reason).replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
-            .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
-            .replace("{TARGET}", punishment.targetName).replace("{ISSUER}", punishment.issuerName)
-        ), PlayerKickEvent.Cause.BANNED)
+        val targetMessage: String = getPunishmentMessage(punishment, announcement)
+        val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
 
-        Main.PUNISHMENTS_WEBHOOK.sendMessage(embeds = listOf(banEmbed(punishment, listOf(punishmentScope, announcementStatus))))
+        target?.kick(MiniMessage.miniMessage().deserialize(targetMessage), PlayerKickEvent.Cause.BANNED)
 
+        if (announcement == PunishmentModifiers.PUBLIC) {
+            Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
+        } else if (announcement == PunishmentModifiers.SILENT) {
+            Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
+        }
+
+        Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(banEmbed(punishment, listOf(scope, announcement))))
         return Result.SUCCESS
     }
 }

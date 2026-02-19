@@ -11,9 +11,9 @@ import net.minepact.api.punishment.PunishmentModifiers
 import java.text.SimpleDateFormat
 import java.util.Date
 
-fun banEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Embed(
+fun warnEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Embed(
         author = Author(),
-        title = "${punishment.targetName} has been banned",
+        title = "${punishment.targetName} has been warned",
         url = null,
         descriptionLines = listOf(
             "",
@@ -30,7 +30,7 @@ fun banEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Emb
             "**Expires**: ${formatDate(punishment.expiresAt)}",
             "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
         ),
-        colour = 0xFF0000,
+        colour = 0xECFF85,
         fields = listOf(),
         thumbnail = null,
         image = null,
@@ -38,9 +38,9 @@ fun banEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Emb
             .format(Date(System.currentTimeMillis()))}")
     )
 
-fun unbanEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Embed(
+fun unwarnEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = Embed(
     author = Author(),
-    title = "${punishment.targetName} has been unbanned",
+    title = "${punishment.targetName} has been unwarned",
     url = null,
     descriptionLines = listOf(
         "",
@@ -52,7 +52,7 @@ fun unbanEmbed(punishment: Punishment, modifiers: List<PunishmentModifiers>) = E
         "**Reason**: ${punishment.reason}",
         "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
     ),
-    colour = 0xEC5AAD,
+    colour = 0xF1F1A1,
     fields = listOf(),
     thumbnail = null,
     image = null,

@@ -30,7 +30,7 @@ fun formatDuration(duration: Long): String {
     return parts.joinToString(" ")
 }
 fun getLengthFromIdentifier(identifier: String): Long {
-    val regex = Regex("(\\d+)([smhd])")
+    val regex = Regex("(\\d+)([smhdwMy])")
     val matchResult = regex.find(identifier) ?: return 0
 
     val value = matchResult.groupValues[1].toLong()
@@ -41,6 +41,9 @@ fun getLengthFromIdentifier(identifier: String): Long {
         "m" -> value * 60_000
         "h" -> value * 3_600_000
         "d" -> value * 86_400_000
+        "w" -> value * 604_800_000
+        "M" -> value * 2_592_000_000
+        "y" -> value * 31_536_000_000
         else -> 0
     }
 }
@@ -50,4 +53,10 @@ fun formatDate(duration: Long): String {
         return "Never"
     }
     return SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Date(duration))
+}
+fun formatDateShort(duration: Long): String {
+    if (duration == Long.MIN_VALUE) {
+        return "Never"
+    }
+    return SimpleDateFormat("dd/MM/yy").format(Date(duration))
 }

@@ -15,15 +15,19 @@ abstract class SQLDatabase(
     protected val dataSource: HikariDataSource
 
     init {
-        val hikari = HikariConfig().apply {
-            jdbcUrl = createJdbcUrl()
-            username = config.username
-            password = config.password
-            maximumPoolSize = config.poolSize
-        }
+        try {
+            val hikari = HikariConfig().apply {
+                jdbcUrl = createJdbcUrl()
+                username = config.username
+                password = config.password
+                maximumPoolSize = config.poolSize
+            }
 
-        hikari.driverClassName = driverClass()
-        dataSource = HikariDataSource(hikari)
+            hikari.driverClassName = driverClass()
+            dataSource = HikariDataSource(hikari)
+        } catch(e: Exception) {
+            throw RuntimeException("Failed to connect to the database!", e)
+        }
     }
 
     protected abstract fun createJdbcUrl(): String

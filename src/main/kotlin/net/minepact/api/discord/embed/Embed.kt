@@ -13,6 +13,28 @@ class Embed(
     val image: Image? = null,
     val footer: Footer? = null
 ) {
+    constructor(
+        author: Author? = null,
+        title: String? = null,
+        url: URL? = null,
+        descriptionLines: List<String>? = null,
+        colour: Int? = null,
+        fields: List<Field> = emptyList(),
+        thumbnail: Image? = null,
+        image: Image? = null,
+        footer: Footer? = null
+    ) : this(
+        author = author,
+        title = title,
+        url = url,
+        description = descriptionLines?.joinToString(separator = "\n"),
+        colour = colour,
+        fields = fields,
+        thumbnail = thumbnail,
+        image = image,
+        footer = footer
+    )
+
     fun toJSON(): String {
         val parts = mutableListOf<String>()
 

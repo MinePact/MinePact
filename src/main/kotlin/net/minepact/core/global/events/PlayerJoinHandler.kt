@@ -7,6 +7,9 @@ import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDuration
+import net.minepact.api.punishment.PunishmentModifiers
+import net.minepact.api.punishment.PunishmentType
+import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
 import net.minepact.core.global.configs.PunishmentConfig
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -23,20 +26,13 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         val potentialPunishments = PUNISHMENT_REPOSITORY.findByTarget(event.player.name)
 
         potentialPunishments.get().forEach { punishment -> run {
-            if (System.currentTimeMillis() > punishment.expiresAt!!) return
-            event.player.kick(MiniMessage.miniMessage().deserialize(
-                ConfigurationRegistry.get(PunishmentConfig::class).ban.kickMessage
-                    .joinToString { "\n" }
-                    .replace("{REASON}", punishment.reason)
-                    .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
-                    .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
-                    .replace("{TARGET}", punishment.targetName)
-                    .replace("{ISSUER}", punishment.issuerName)
+                if ((System.currentTimeMillis() > punishment.expiresAt) && (punishment.expiresAt != Long.MIN_VALUE)) return@run
+                if (punishment.type != PunishmentType.BAN) return@run
+                if (event.player.hasPermission("minepact.punishments.bypass.${punishment.type.name.lowercase()}")) return@run
 
-            ),
-                PlayerKickEvent.Cause.BANNED
-            )
-        } }
+                event.player.kick(MiniMessage.miniMessage().deserialize(getPunishmentMessage(punishment, PunishmentModifiers.GLOBAL)), PlayerKickEvent.Cause.BANNED)
+            }
+        }
 
         if (Main.MAIN_CONFIG.spawn.teleportOnJoin) {
             event.player.teleport(Location(

@@ -40,7 +40,7 @@ class PunishmentRepository : Repository<Punishment>() {
             entity.issuerName,
             entity.reason,
             entity.punishedAt,
-            entity.expiresAt ?: Long.MIN_VALUE
+            entity.expiresAt
         )
     }
 
