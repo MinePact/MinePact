@@ -2,6 +2,7 @@ package net.minepact.api.data.repository
 
 import net.minepact.Main
 import net.minepact.api.data.Database
+import net.minepact.api.data.helper.DatabaseTable
 import java.sql.ResultSet
 import java.util.concurrent.CompletableFuture
 
@@ -12,17 +13,25 @@ abstract class Repository<T> {
         ensureTableExists()
     }
 
-    abstract fun table(): String
+    abstract fun table(): DatabaseTable
+    fun tableName(): String = table().name
     abstract fun map(rs: ResultSet): T
 
-    abstract fun insertColumns(): List<String>
+    fun insertColumns(): List<String> = table().columns.map { it.name }
     abstract fun insertValues(entity: T): List<Any>
 
-    abstract fun ensureTableExists()
+    private fun ensureTableExists() {
+        val sql = table().createEnsureScript()
+        database.update(sql).thenAccept {
+            Main.instance.logger.info {
+                "[${this.javaClass.simpleName}] Table created if not found."
+            }
+        }
+    }
 
     fun findAll(): CompletableFuture<List<T>> {
         return database.query(
-            "SELECT * FROM ${table()}",
+            "SELECT * FROM ${tableName()}",
             mapper = ::map
         )
     }
@@ -32,7 +41,7 @@ abstract class Repository<T> {
         val updateClause = columns.joinToString(", ") { "$it = VALUES($it)" }
 
         val sql = """
-        INSERT INTO ${table()} (${columns.joinToString(", ")})
+        INSERT INTO ${tableName()} (${columns.joinToString(", ")})
         VALUES ($placeholders)
         ON DUPLICATE KEY UPDATE $updateClause
     """.trimIndent()
@@ -42,8 +51,22 @@ abstract class Repository<T> {
 
     fun deleteById(id: Any): CompletableFuture<Int> {
         return database.update(
-            "DELETE FROM ${table()} WHERE id = ?",
+            "DELETE FROM ${tableName()} WHERE id = ?",
             listOf(id)
         )
     }
+
+    protected fun <T> querySingle(
+        sql: String,
+        params: List<Any> = emptyList(),
+        mapper: (ResultSet) -> T
+    ): CompletableFuture<T?> {
+        return database.query(sql, params, mapper)
+            .thenApply { results -> results.firstOrNull() }
+    }
+    protected fun <T> queryList(
+        sql: String,
+        params: List<Any> = emptyList(),
+        mapper: (ResultSet) -> T
+    ): CompletableFuture<List<T>> = database.query(sql, params, mapper)
 }

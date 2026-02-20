@@ -1,6 +1,7 @@
 package net.minepact.api.data.repository
 
-import net.minepact.Main
+import net.minepact.api.data.helper.DataType
+import net.minepact.api.data.helper.TableBuilder
 import net.minepact.api.server.ServerInfo
 import net.minepact.api.server.ServerType
 import java.sql.ResultSet
@@ -8,7 +9,12 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 class ServerRepository : Repository<ServerInfo>() {
-    override fun table() = "servers"
+    override fun table() = TableBuilder("servers")
+        .column("uuid", DataType.UUID, primaryKey = true)
+        .column("name", DataType.STRING, nullable = false)
+        .column("type", DataType.STRING, nullable = false)
+        .column("staging", DataType.BOOLEAN, nullable = false)
+        .build()
     override fun map(rs: ResultSet): ServerInfo {
         return ServerInfo(
             uuid = UUID.fromString(rs.getString("uuid")),
@@ -17,10 +23,6 @@ class ServerRepository : Repository<ServerInfo>() {
             staging = rs.getBoolean("staging")
         )
     }
-
-    override fun insertColumns(): List<String> {
-        return listOf("uuid", "name", "type", "staging")
-    }
     override fun insertValues(entity: ServerInfo): List<Any> {
         return listOf(
             entity.uuid.toString(),
@@ -28,23 +30,6 @@ class ServerRepository : Repository<ServerInfo>() {
             entity.type.name,
             entity.staging
         )
-    }
-
-    override fun ensureTableExists() {
-        val sql = """
-            CREATE TABLE IF NOT EXISTS servers (
-                uuid CHAR(36) PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                type VARCHAR(50) NOT NULL,
-                staging BOOLEAN NOT NULL
-            )
-        """.trimIndent()
-
-        database.update(sql).thenAccept { Main.instance.logger.info("[ServerRepository] Table '${table()}' ensured.") }
-            .exceptionally { ex ->
-                ex.printStackTrace()
-                null
-            }
     }
 
     fun findByUUID(uuid: UUID): CompletableFuture<List<ServerInfo>> =
@@ -65,7 +50,7 @@ class ServerRepository : Repository<ServerInfo>() {
             listOf(type.name),
             ::map
         )
-    fun findByType(staging: Boolean): CompletableFuture<List<ServerInfo>> =
+    fun findByStaging(staging: Boolean): CompletableFuture<List<ServerInfo>> =
         database.query(
             "SELECT * FROM servers WHERE staging = ?",
             listOf(staging),

@@ -4,6 +4,7 @@ import net.minepact.Main
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
+import net.minepact.api.punishment.modifier.ScopeModifier
 import org.bukkit.command.CommandSender
 
 fun createPunishment(
@@ -12,9 +13,9 @@ fun createPunishment(
     targetName: String,
     reason: String,
     expiresAt: Long,
-    scope: PunishmentModifier
+    scope: ScopeModifier
 ): Punishment {
-    val servers = if (scope == PunishmentModifier.GLOBAL) Main.SERVER_REPOSITORY.findAll().get()
+    val servers = if (scope == ScopeModifier.GLOBAL) Main.SERVER_REPOSITORY.findAll().get()
     else listOf(Main.SERVER.info)
 
     return Punishment(

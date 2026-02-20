@@ -1,16 +1,24 @@
 package net.minepact.api.data.repository
 
-import net.minepact.Main
+import net.minepact.api.data.helper.DataType
+import net.minepact.api.data.helper.TableBuilder
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentType
-import net.minepact.api.server.ServerInfo
-import net.minepact.api.server.ServerType
 import java.sql.ResultSet
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 class PunishmentRepository : Repository<Punishment>() {
-    override fun table() = "punishments"
+    override fun table() = TableBuilder("punishments")
+        .column("id", DataType.UUID, primaryKey = true)
+        .column("servers", DataType.STRING, nullable = false)
+        .column("type", DataType.STRING, nullable = false)
+        .column("target", DataType.STRING, nullable = false)
+        .column("issuer", DataType.STRING, nullable = false)
+        .column("reason", DataType.STRING, nullable = false)
+        .column("punished_at", DataType.LONG, nullable = false)
+        .column("expires_at", DataType.LONG, nullable = false)
+        .build()
     override fun map(rs: ResultSet): Punishment {
         return Punishment(
             id = UUID.fromString(rs.getString("id")),
@@ -28,9 +36,6 @@ class PunishmentRepository : Repository<Punishment>() {
             expiresAt = rs.getLong("expires_at")
         )
     }
-    override fun insertColumns(): List<String> {
-        return listOf("id", "servers", "type", "target", "issuer", "reason", "punished_at", "expires_at")
-    }
     override fun insertValues(entity: Punishment): List<Any> {
         return listOf(
             entity.id,
@@ -44,48 +49,24 @@ class PunishmentRepository : Repository<Punishment>() {
         )
     }
 
-    override fun ensureTableExists() {
-        val sql = """
-            CREATE TABLE IF NOT EXISTS punishments (
-                id CHAR(36) PRIMARY KEY,
-                servers VARCHAR(255) NOT NULL,
-                type VARCHAR(255) NOT NULL,
-                target VARCHAR(255) NOT NULL,
-                issuer VARCHAR(255) NOT NULL,
-                reason VARCHAR(255) NOT NULL,
-                punished_at BIGINT(255) NOT NULL,
-                expires_at BIGINT(255) NOT NULL
-            )
-        """.trimIndent()
-
-        database.update(sql).thenAccept { Main.instance.logger.info("[PunishmentRepository] Table '${table()}' ensured.") }
-            .exceptionally { ex ->
-                ex.printStackTrace()
-                null
-            }
-    }
-
     fun findByID(id: UUID): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE id = ?",
             listOf(id.toString()),
             ::map
         )
-
     fun findByTarget(targetName: String): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE target = ?",
             listOf(targetName),
             ::map
         )
-
     fun findByIssuer(issuerName: String): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE issuer = ?",
             listOf(issuerName),
             ::map
         )
-
     fun findByServer(serverId: UUID): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE servers LIKE ?",

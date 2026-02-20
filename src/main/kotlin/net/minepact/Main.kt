@@ -6,6 +6,7 @@ import net.minepact.api.data.Database
 import net.minepact.api.data.DatabaseConfig
 import net.minepact.api.data.DatabaseFactory
 import net.minepact.api.data.DatabaseProvider
+import net.minepact.api.data.repository.PlayerRepository
 import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.discord.Webhook
@@ -41,7 +42,9 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         lateinit var DATABASE_CONFIG: DatabaseConfig
         lateinit var DATABASE: Database
+
         lateinit var SERVER_REPOSITORY: ServerRepository
+        lateinit var PLAYER_REPOSITORY: PlayerRepository
         lateinit var PUNISHMENT_REPOSITORY: PunishmentRepository
 
         lateinit var UPDATES_WEBHOOK: Webhook
@@ -72,7 +75,9 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
             filePath = "mpdb.sqlite" // Fallback
         )
         DATABASE = DatabaseFactory.create(DATABASE_CONFIG)
+
         SERVER_REPOSITORY = ServerRepository()
+        PLAYER_REPOSITORY = PlayerRepository()
         PUNISHMENT_REPOSITORY = PunishmentRepository()
 
         SERVER = Server()

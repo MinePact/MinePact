@@ -3,7 +3,9 @@ package net.minepact.core.global.configs
 import net.minepact.api.config.AbstractConfigurationFile
 import net.minepact.api.config.Comment
 import net.minepact.api.config.ReloadableConfig
+import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.PunishmentModifier
+import net.minepact.api.punishment.modifier.ScopeModifier
 
 class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig> {
     override val fileName = "config.yml"
@@ -11,8 +13,8 @@ class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig>
         /* TODO: Database reload logic */
     }
 
-    var default_announcement_status_modifier: String = PunishmentModifier.PUBLIC.name
-    var default_punishment_scope_modifier: String = PunishmentModifier.LOCAL.name
+    var default_announcement_status_modifier: String = AnnouncementModifier.PUBLIC.name
+    var default_punishment_scope_modifier: String = ScopeModifier.LOCAL.name
 
     var webhookUrl: String = ""
 

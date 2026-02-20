@@ -1,0 +1,45 @@
+package net.minepact.api.player
+
+import net.minepact.Main
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
+
+object PlayerRegistry {
+    val playersByUUID: MutableMap<UUID, Player> = mutableMapOf()
+    private val nameToUUID: MutableMap<String, UUID> = mutableMapOf()
+
+    fun all(): List<Player> = playersByUUID.values.toList()
+
+    fun get(uuid: UUID): CompletableFuture<Player> {
+        playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
+
+        return Main.PLAYER_REPOSITORY.findByUUID(uuid).thenApply { data ->
+            if (data == null) return@thenApply null
+            val player = Player(data, online = false)
+            register(player)
+            player
+        }
+    }
+    fun get(name: String): CompletableFuture<Player> {
+        val lower = name.lowercase()
+        nameToUUID[lower]?.let { uuid ->
+            playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
+        }
+
+        return Main.PLAYER_REPOSITORY.findByName(lower).thenApply { data ->
+            if (data == null) return@thenApply null
+            val player = Player(data, online = false)
+            register(player)
+            player
+        }
+    }
+
+    fun register(player: Player) {
+        playersByUUID[player.data.uuid] = player
+        nameToUUID[player.data.name.lowercase()] = player.data.uuid
+    }
+    fun unregister(uuid: UUID) {
+        val player = playersByUUID.remove(uuid) ?: return
+        nameToUUID.remove(player.data.name.lowercase())
+    }
+}

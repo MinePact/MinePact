@@ -8,6 +8,7 @@ import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.modifier.PunishmentModifier
+import net.minepact.api.punishment.modifier.ScopeModifier
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -18,7 +19,7 @@ fun muteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Emb
         descriptionLines = listOf(
             "",
             "**Target Server**: ${
-                if (modifiers.contains(PunishmentModifier.GLOBAL)) "Network"
+                if (modifiers.contains(ScopeModifier.GLOBAL)) "Network"
                 else SERVER.info.name
             }",
             "**Staff**: ${punishment.issuerName}",
@@ -37,7 +38,6 @@ fun muteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Emb
         footer = Footer("Server UUID: ${SERVER.info.uuid} | Time: ${SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
             .format(Date(System.currentTimeMillis()))}")
     )
-
 fun unmuteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Embed(
     author = Author(),
     title = "${punishment.targetName} has been unmuted",
@@ -45,7 +45,7 @@ fun unmuteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = E
     descriptionLines = listOf(
         "",
         "**Target Server**: ${
-            if (modifiers.contains(PunishmentModifier.GLOBAL)) "Network"
+            if (modifiers.contains(ScopeModifier.GLOBAL)) "Network"
             else SERVER.info.name
         }",
         "**Staff**: ${punishment.issuerName}",

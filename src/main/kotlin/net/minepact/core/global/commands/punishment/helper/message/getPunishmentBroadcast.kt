@@ -6,9 +6,10 @@ import net.minepact.api.misc.formatDuration
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
+import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.core.global.configs.PunishmentConfig
 
-fun getPunishmentBroadcast(punishment: Punishment, announcement: PunishmentModifier): String {
+fun getPunishmentBroadcast(punishment: Punishment, announcement: AnnouncementModifier): String {
     val config: PunishmentConfig = ConfigurationRegistry.get(PunishmentConfig::class)
 
     when (punishment.type) {
@@ -19,7 +20,7 @@ fun getPunishmentBroadcast(punishment: Punishment, announcement: PunishmentModif
                 .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
                 .replace("{TARGET}", punishment.targetName)
                 .replace("{ISSUER}", punishment.issuerName)
-                .replace("{BCST_MOD}", announcement.name)
+                .replace("{BCST_MOD}", announcement.value)
         }
         PunishmentType.MUTE -> {
             return config.mute.announcementMessage
@@ -28,7 +29,7 @@ fun getPunishmentBroadcast(punishment: Punishment, announcement: PunishmentModif
                 .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
                 .replace("{TARGET}", punishment.targetName)
                 .replace("{ISSUER}", punishment.issuerName)
-                .replace("{BCST_MOD}", announcement.name)
+                .replace("{BCST_MOD}", announcement.value)
         }
         PunishmentType.WARN -> {
             return config.warn.announcementMessage
@@ -37,7 +38,7 @@ fun getPunishmentBroadcast(punishment: Punishment, announcement: PunishmentModif
                 .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
                 .replace("{TARGET}", punishment.targetName)
                 .replace("{ISSUER}", punishment.issuerName)
-                .replace("{BCST_MOD}", announcement.name)
+                .replace("{BCST_MOD}", announcement.value)
         }
     }
 }

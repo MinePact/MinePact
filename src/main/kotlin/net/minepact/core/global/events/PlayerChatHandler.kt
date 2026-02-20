@@ -4,8 +4,8 @@ import net.minepact.Main
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.messages.send
-import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
+import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
 import org.bukkit.event.player.PlayerChatEvent
 import kotlin.collections.forEach
@@ -26,7 +26,7 @@ class PlayerChatHandler : SimpleEventHandler<PlayerChatEvent>() {
             if (event.player.hasPermission("minepact.punishments.bypass.${punishment.type.name.lowercase()}")) return@run
 
             event.isCancelled = true
-            player.send(getPunishmentMessage(punishment, PunishmentModifier.GLOBAL))
+            player.send(getPunishmentMessage(punishment, AnnouncementModifier.SILENT))
         } }
 
         event.format = "${player.name}: $message"
