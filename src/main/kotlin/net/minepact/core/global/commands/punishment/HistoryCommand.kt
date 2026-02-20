@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands.punishment
 
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
@@ -11,7 +10,6 @@ import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.messages.send
-import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDateShort
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.punishment.Punishment
@@ -37,10 +35,13 @@ class HistoryCommand : Command(
     ): Result {
         val repo: PunishmentRepository = Main.PUNISHMENT_REPOSITORY
         val target: String = args[0].value as String
+        val limit: Int = args[1].value as Int
 
-        val punishments: List<Punishment> = repo.findByTarget(target).get()
-        sender.send("<green>History for <white>$target<green>:")
-        if (punishments.isEmpty()) sender.send("<yellow>| <red>No punishments found! :(")
+        var punishments: List<Punishment> = repo.findByTarget(target).get()
+        sender.send("<green>Last $limit punishments for <white>$target<green>:")
+        if (punishments.isEmpty()) sender.send("<yellow>| <red>No punishments found :(")
+
+        punishments = punishments.subList(0, minOf(limit, punishments.size))
         format(punishments.sortedByDescending { it.punishedAt }).forEach { sender.send(it) }
 
         return Result.SUCCESS

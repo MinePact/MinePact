@@ -1,5 +1,6 @@
 package net.minepact.core.global.commands.punishment
 
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
@@ -9,8 +10,9 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
-import net.minepact.api.punishment.PunishmentModifiers
 import net.minepact.api.punishment.PunishmentType
+import net.minepact.api.punishment.modifier.AnnouncementModifier
+import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.core.discord.embeds.punishments.muteEmbed
 import net.minepact.core.global.commands.punishment.helper.createPunishment
 import net.minepact.core.global.commands.punishment.helper.retrieveModifiers
@@ -24,6 +26,7 @@ import net.minepact.core.global.commands.punishment.helper.resolveScopeModifier
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerKickEvent
 import kotlin.collections.mutableListOf
 
 class MuteCommand : Command(
@@ -59,8 +62,8 @@ class MuteCommand : Command(
         val (_, expiresAt) = parseLength(rawTokens)
         val reason = parseReason(rawTokens)
 
-        val scope = resolveScopeModifier(modifiers)
-        val announcement = resolveAnnouncementModifier(modifiers)
+        val scope: ScopeModifier = resolveScopeModifier(modifiers)
+        val announcement: AnnouncementModifier = resolveAnnouncementModifier(modifiers)
 
         val punishment = createPunishment(
             sender = sender,
@@ -75,12 +78,10 @@ class MuteCommand : Command(
         val targetMessage: String = getPunishmentMessage(punishment, announcement)
         val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
 
-        target?.send(targetMessage)
-
-        if (announcement == PunishmentModifiers.PUBLIC) {
-            Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
-        } else if (announcement == PunishmentModifiers.SILENT) {
-            Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
+        target?.kick(MiniMessage.miniMessage().deserialize(targetMessage), PlayerKickEvent.Cause.BANNED)
+        when (announcement) {
+            AnnouncementModifier.PUBLIC -> Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
+            AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
         }
 
         Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(muteEmbed(punishment, listOf(scope, announcement))))

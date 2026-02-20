@@ -4,11 +4,11 @@ import net.minepact.api.config.ConfigurationRegistry
 import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.punishment.Punishment
-import net.minepact.api.punishment.PunishmentModifiers
+import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.core.global.configs.PunishmentConfig
 
-fun getPunishmentMessage(punishment: Punishment, announcement: PunishmentModifiers): String {
+fun getPunishmentMessage(punishment: Punishment, announcement: PunishmentModifier): String {
     val config: PunishmentConfig = ConfigurationRegistry.get(PunishmentConfig::class)
 
     when (punishment.type) {

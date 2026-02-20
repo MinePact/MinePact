@@ -10,7 +10,8 @@ class Punishment(
     val issuerName: String,
     val reason: String,
     val punishedAt: Long,
-    val expiresAt: Long
+    val expiresAt: Long,
+    val reverted: Boolean = false
 ) {
     companion object {
         fun generateId(): UUID {
@@ -29,6 +30,7 @@ class Punishment(
                 reason=$reason,
                 punishedAt=$punishedAt,
                 expiresAt=$expiresAt,
+                reverted=$reverted
             ]
         """.trimIndent()
     }
