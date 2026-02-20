@@ -9,6 +9,7 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
+import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.messages.send
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
@@ -74,7 +75,7 @@ class MuteCommand : Command(
             scope = scope
         )
 
-        Main.PUNISHMENT_REPOSITORY.insert(punishment)
+        PunishmentRepository.insert(punishment)
         val targetMessage: String = getPunishmentMessage(punishment, announcement)
         val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
 

@@ -5,8 +5,10 @@ import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
+import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.messages.send
 import net.minepact.api.server.ServerInfo
+import net.minepact.core.global.configs.ServerConfig
 import org.bukkit.command.CommandSender
 import java.util.concurrent.CompletableFuture
 
@@ -24,15 +26,13 @@ class ServerInfoCommand : Command(
         sender: CommandSender, args: MutableList<Argument<*>>
     ): Result {
         val serverNames: List<String> = if (args.isEmpty()) {
-            val allServers = Main.SERVER_REPOSITORY.findAll().get()
+            val allServers = ServerRepository.findAll().get()
             allServers.map { it.name }
         } else {
             args.map { it.value as String }
         }
 
-        val futures: List<CompletableFuture<List<ServerInfo>>> = serverNames.map { name ->
-            Main.SERVER_REPOSITORY.findByName(name)
-        }
+        val futures: List<CompletableFuture<List<ServerInfo>>> = serverNames.map { name -> ServerRepository.findByName(name) }
 
         CompletableFuture.allOf(*futures.toTypedArray()).thenAccept {
             futures.forEach { future ->

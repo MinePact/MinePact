@@ -2,6 +2,8 @@ package net.minepact.core.global.events
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
+import net.minepact.api.data.repository.PlayerRepository
+import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.player.Player
@@ -21,29 +23,24 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
     override fun handle(context: EventContext<PlayerJoinEvent>) {
         val event: PlayerJoinEvent = context.event
         event.joinMessage(MiniMessage.miniMessage().deserialize("<dark_grey>[<green><bold>+</bold><dark_grey>] <grey>${event.player.name}"))
-
-        val PLAYER_REPOSITORY = Main.PLAYER_REPOSITORY
-        if (PLAYER_REPOSITORY.findByUUID(event.player.uniqueId).get() == null) {
+        if (PlayerRepository.findByUUID(event.player.uniqueId).get() == null) {
             val newData = PlayerData(
                 uuid = event.player.uniqueId,
                 name = event.player.name,
+                discordId = "",
                 firstJoined = System.currentTimeMillis(),
-                lastJoined = System.currentTimeMillis()
+                lastSeen = System.currentTimeMillis()
             )
-            PLAYER_REPOSITORY.insert(newData)
+            PlayerRepository.insert(newData)
 
             if (!PlayerRegistry.playersByUUID.containsKey(event.player.uniqueId)) PlayerRegistry.register(Player(newData, true))
         } else {
-            val data = PLAYER_REPOSITORY.findByUUID(event.player.uniqueId).get() ?: return
+            val data = PlayerRepository.findByUUID(event.player.uniqueId).get() ?: return
             if (!PlayerRegistry.playersByUUID.containsKey(event.player.uniqueId)) PlayerRegistry.register(Player(data, true))
         }
 
-        PlayerRegistry.get(event.player.uniqueId).thenAccept {
-            it.online = true
-        }
-
-        val PUNISHMENT_REPOSITORY = Main.PUNISHMENT_REPOSITORY
-        val potentialPunishments = PUNISHMENT_REPOSITORY.findByTarget(event.player.name)
+        PlayerRegistry.get(event.player.uniqueId).thenAccept { it.online = true }
+        val potentialPunishments = PunishmentRepository.findByTarget(event.player.name)
 
         potentialPunishments.get().forEach { punishment -> run {
                 if ((System.currentTimeMillis() > punishment.expiresAt) && (punishment.expiresAt != Long.MIN_VALUE)) return@run

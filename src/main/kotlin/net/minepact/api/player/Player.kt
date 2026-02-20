@@ -4,5 +4,7 @@ class Player(
     val data: PlayerData,
     var online: Boolean
 ) {
+    fun sync() {
 
+    }
 }

@@ -18,12 +18,7 @@ class Webhook(
     fun sendMessage(content: String? = null, embeds: List<Embed> = emptyList()) {
         val json = formatAsJSON(content, embeds)
         if (webhookUrl.isNullOrBlank()) {
-            val logger = try { Main.instance.logger } catch (_: Throwable) { null }
-            if (logger != null) {
-                logger.warning("Webhook URL is not configured; skipping sendMessage().")
-            } else {
-                println("Webhook URL is not configured; skipping sendMessage().")
-            }
+            Main.instance.logger.warning("Webhook URL is not configured; skipping sendMessage().")
             return
         }
 
@@ -40,20 +35,10 @@ class Webhook(
         try {
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
             if (response.statusCode() != 204) {
-                val logger = try { Main.instance.logger } catch (_: Throwable) { null }
-                if (logger != null) {
-                    logger.warning($$"Failed to send webhook: ${response.statusCode()} ${response.body()}")
-                } else {
-                    println($$"Failed to send webhook: ${response.statusCode()} ${response.body()}")
-                }
+                Main.instance.logger.warning($$"Failed to send webhook: ${response.statusCode()} ${response.body()}")
             }
         } catch (e: Exception) {
-            val logger = try { Main.instance.logger } catch (_: Throwable) { null }
-            if (logger != null) {
-                logger.severe($$"Failed to send webhook: ${e.message}")
-            } else {
-                e.printStackTrace()
-            }
+            Main.instance.logger.severe($$"Failed to send webhook: ${e.message}")
         }
     }
 

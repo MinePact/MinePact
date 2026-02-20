@@ -7,33 +7,34 @@ import java.sql.ResultSet
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
-class PlayerRepository : Repository<PlayerData>() {
+object PlayerRepository : Repository<PlayerData>() {
     override fun table() = TableBuilder("players")
         .column("uuid", DataType.UUID, primaryKey = true)
         .column("name", DataType.STRING, nullable = false)
+        .column("discordId", DataType.STRING, nullable = true)
         .column("nick", DataType.STRING, nullable = false)
         .column("chat_colour", DataType.INT, nullable = false)
         .column("first_joined", DataType.LONG, nullable = false)
-        .column("last_joined", DataType.LONG, nullable = false)
+        .column("last_seen", DataType.LONG, nullable = false)
         .build()
-    override fun map(rs: ResultSet): PlayerData {
-        return PlayerData(
+    override fun map(rs: ResultSet): PlayerData = PlayerData(
             uuid = UUID.fromString(rs.getString("uuid")),
             name = rs.getString("name"),
+            discordId = rs.getString("discordId"),
             nick = rs.getString("nick"),
             chatColour = rs.getInt("chat_colour"),
             firstJoined = rs.getLong("first_joined"),
-            lastJoined = rs.getLong("last_joined")
+            lastSeen = rs.getLong("last_seen")
         )
-    }
     override fun insertValues(entity: PlayerData): List<Any> {
         return listOf(
             entity.uuid.toString(),
             entity.name,
+            entity.discordId,
             entity.nick,
             entity.chatColour,
             entity.firstJoined,
-            entity.lastJoined
+            entity.lastSeen
         )
     }
 

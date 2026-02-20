@@ -1,6 +1,6 @@
 package net.minepact.api.player
 
-import net.minepact.Main
+import net.minepact.api.data.repository.PlayerRepository
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
@@ -9,11 +9,12 @@ object PlayerRegistry {
     private val nameToUUID: MutableMap<String, UUID> = mutableMapOf()
 
     fun all(): List<Player> = playersByUUID.values.toList()
+    fun online(): List<Player> = playersByUUID.values.filter { it.online }
 
     fun get(uuid: UUID): CompletableFuture<Player> {
         playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
 
-        return Main.PLAYER_REPOSITORY.findByUUID(uuid).thenApply { data ->
+        return PlayerRepository.findByUUID(uuid).thenApply { data ->
             if (data == null) return@thenApply null
             val player = Player(data, online = false)
             register(player)
@@ -23,10 +24,11 @@ object PlayerRegistry {
     fun get(name: String): CompletableFuture<Player> {
         val lower = name.lowercase()
         nameToUUID[lower]?.let { uuid ->
-            playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
+            playersByUUID[uuid]?.let {
+                return CompletableFuture.completedFuture(it)
+            }
         }
-
-        return Main.PLAYER_REPOSITORY.findByName(lower).thenApply { data ->
+        return PlayerRepository.findByName(lower).thenApply { data ->
             if (data == null) return@thenApply null
             val player = Player(data, online = false)
             register(player)

@@ -8,29 +8,25 @@ import java.sql.ResultSet
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
-class ServerRepository : Repository<ServerInfo>() {
+object ServerRepository : Repository<ServerInfo>() {
     override fun table() = TableBuilder("servers")
         .column("uuid", DataType.UUID, primaryKey = true)
         .column("name", DataType.STRING, nullable = false)
         .column("type", DataType.STRING, nullable = false)
         .column("staging", DataType.BOOLEAN, nullable = false)
         .build()
-    override fun map(rs: ResultSet): ServerInfo {
-        return ServerInfo(
+    override fun map(rs: ResultSet): ServerInfo = ServerInfo(
             uuid = UUID.fromString(rs.getString("uuid")),
             name = rs.getString("name"),
             type = ServerType.valueOf(rs.getString("type")),
             staging = rs.getBoolean("staging")
         )
-    }
-    override fun insertValues(entity: ServerInfo): List<Any> {
-        return listOf(
+    override fun insertValues(entity: ServerInfo): List<Any> = listOf(
             entity.uuid.toString(),
             entity.name,
             entity.type.name,
             entity.staging
         )
-    }
 
     fun findByUUID(uuid: UUID): CompletableFuture<List<ServerInfo>> =
         database.query(

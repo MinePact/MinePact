@@ -1,6 +1,7 @@
 package net.minepact.core.global.commands.punishment.helper
 
 import net.minepact.Main
+import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
@@ -15,7 +16,7 @@ fun createPunishment(
     expiresAt: Long,
     scope: ScopeModifier
 ): Punishment {
-    val servers = if (scope == ScopeModifier.GLOBAL) Main.SERVER_REPOSITORY.findAll().get()
+    val servers = if (scope == ScopeModifier.GLOBAL) ServerRepository.findAll().get()
     else listOf(Main.SERVER.info)
 
     return Punishment(

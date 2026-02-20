@@ -33,7 +33,7 @@ class HistoryCommand : Command(
         sender: CommandSender,
         args: MutableList<Argument<*>>
     ): Result {
-        val repo: PunishmentRepository = Main.PUNISHMENT_REPOSITORY
+        val repo: PunishmentRepository = PunishmentRepository
         val target: String = args[0].value as String
         val limit: Int = args[1].value as Int
 

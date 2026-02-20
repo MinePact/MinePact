@@ -8,7 +8,7 @@ import java.sql.ResultSet
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
-class PunishmentRepository : Repository<Punishment>() {
+object PunishmentRepository : Repository<Punishment>() {
     override fun table() = TableBuilder("punishments")
         .column("id", DataType.UUID, primaryKey = true)
         .column("servers", DataType.STRING, nullable = false)
@@ -19,8 +19,7 @@ class PunishmentRepository : Repository<Punishment>() {
         .column("punished_at", DataType.LONG, nullable = false)
         .column("expires_at", DataType.LONG, nullable = false)
         .build()
-    override fun map(rs: ResultSet): Punishment {
-        return Punishment(
+    override fun map(rs: ResultSet): Punishment = Punishment(
             id = UUID.fromString(rs.getString("id")),
             targetServers = rs.getString("servers")
                 .replace("[", "")
@@ -35,9 +34,7 @@ class PunishmentRepository : Repository<Punishment>() {
             punishedAt = rs.getLong("punished_at"),
             expiresAt = rs.getLong("expires_at")
         )
-    }
-    override fun insertValues(entity: Punishment): List<Any> {
-        return listOf(
+    override fun insertValues(entity: Punishment): List<Any> = listOf(
             entity.id,
             entity.targetServers.toString(),
             entity.type.name,
@@ -47,7 +44,6 @@ class PunishmentRepository : Repository<Punishment>() {
             entity.punishedAt,
             entity.expiresAt
         )
-    }
 
     fun findByID(id: UUID): CompletableFuture<List<Punishment>> =
         database.query(

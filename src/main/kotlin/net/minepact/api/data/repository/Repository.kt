@@ -9,10 +9,6 @@ import java.util.concurrent.CompletableFuture
 abstract class Repository<T> {
     protected var database: Database = Main.DATABASE
 
-    init {
-        ensureTableExists()
-    }
-
     abstract fun table(): DatabaseTable
     fun tableName(): String = table().name
     abstract fun map(rs: ResultSet): T
@@ -20,7 +16,7 @@ abstract class Repository<T> {
     fun insertColumns(): List<String> = table().columns.map { it.name }
     abstract fun insertValues(entity: T): List<Any>
 
-    private fun ensureTableExists() {
+    fun ensureTableExists() {
         val sql = table().createEnsureScript()
         database.update(sql).thenAccept {
             Main.instance.logger.info {
@@ -41,10 +37,20 @@ abstract class Repository<T> {
         val updateClause = columns.joinToString(", ") { "$it = VALUES($it)" }
 
         val sql = """
-        INSERT INTO ${tableName()} (${columns.joinToString(", ")})
-        VALUES ($placeholders)
-        ON DUPLICATE KEY UPDATE $updateClause
-    """.trimIndent()
+                INSERT INTO ${tableName()} (${columns.joinToString(", ")})
+                VALUES ($placeholders)
+                ON DUPLICATE KEY UPDATE $updateClause
+        """.trimIndent()
+        return database.update(sql, insertValues(entity))
+    }
+    fun insertWithoutUpdate(entity: T): CompletableFuture<Int> {
+        val columns = insertColumns()
+        val placeholders = columns.joinToString(", ") { "?" }
+
+        val sql = """
+                INSERT INTO ${tableName()} (${columns.joinToString(", ")})
+                VALUES ($placeholders)
+        """.trimIndent()
 
         return database.update(sql, insertValues(entity))
     }
@@ -54,6 +60,9 @@ abstract class Repository<T> {
             "DELETE FROM ${tableName()} WHERE id = ?",
             listOf(id)
         )
+    }
+    fun deleteAll(): CompletableFuture<Int> {
+        return database.update("DELETE FROM ${tableName()}")
     }
 
     protected fun <T> querySingle(

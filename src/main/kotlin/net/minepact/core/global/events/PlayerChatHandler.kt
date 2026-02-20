@@ -1,6 +1,7 @@
 package net.minepact.core.global.events
 
 import net.minepact.Main
+import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.messages.send
@@ -17,10 +18,7 @@ class PlayerChatHandler : SimpleEventHandler<PlayerChatEvent>() {
         val player = event.player
         val message = event.message
 
-        val PUNISHMENT_REPOSITORY = Main.PUNISHMENT_REPOSITORY
-        val potentialPunishments = PUNISHMENT_REPOSITORY.findByTarget(event.player.name)
-
-        potentialPunishments.get().forEach { punishment -> run {
+        PunishmentRepository.findByTarget(event.player.name).get().forEach { punishment -> run {
             if ((System.currentTimeMillis() > punishment.expiresAt) && (punishment.expiresAt != Long.MIN_VALUE)) return@run
             if (punishment.type != PunishmentType.MUTE) return@run
             if (event.player.hasPermission("minepact.punishments.bypass.${punishment.type.name.lowercase()}")) return@run
