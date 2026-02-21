@@ -10,9 +10,9 @@ fun resolveScopeModifier(modifiers: List<PunishmentModifier>): ScopeModifier {
 
     return when {
         scopeModifiers.contains(ScopeModifier.GLOBAL) && scopeModifiers.contains(ScopeModifier.LOCAL) ->
-            ScopeModifier.valueOf(Main.MAIN_CONFIG.default_announcement_status_modifier)
+            ScopeModifier.valueOf(Main.MAIN_CONFIG.default_punishment_scope_modifier)
         scopeModifiers.contains(ScopeModifier.GLOBAL) -> ScopeModifier.GLOBAL
         scopeModifiers.contains(ScopeModifier.LOCAL) -> ScopeModifier.LOCAL
-        else -> ScopeModifier.valueOf(Main.MAIN_CONFIG.default_announcement_status_modifier)
+        else -> ScopeModifier.valueOf(Main.MAIN_CONFIG.default_punishment_scope_modifier)
     }
 }

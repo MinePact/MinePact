@@ -27,7 +27,6 @@ import net.minepact.core.global.commands.punishment.helper.retrieveModifiers
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerKickEvent
 
 class WarnCommand : Command(
     name = "warn",
@@ -59,9 +58,11 @@ class WarnCommand : Command(
         val rawTokens: MutableList<String> = extractRawTokens(args)
         val modifiers = retrieveModifiers(rawTokens)
 
-        val (_, expiresAt) = parseLength(rawTokens)
-        val reason = parseReason(rawTokens)
+        val (_, parsedExpiresAt) = parseLength(rawTokens)
+        val expiresAt = if (parsedExpiresAt == Long.MIN_VALUE) System.currentTimeMillis() + 604_800_000
+        else parsedExpiresAt
 
+        val reason = parseReason(rawTokens)
         val scope: ScopeModifier = resolveScopeModifier(modifiers)
         val announcement: AnnouncementModifier = resolveAnnouncementModifier(modifiers)
 
@@ -75,10 +76,9 @@ class WarnCommand : Command(
         )
 
         PunishmentRepository.insert(punishment)
-        val targetMessage: String = getPunishmentMessage(punishment, announcement)
         val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
 
-        target?.kick(MiniMessage.miniMessage().deserialize(targetMessage), PlayerKickEvent.Cause.BANNED)
+        target?.send(getPunishmentMessage(punishment, announcement))
         when (announcement) {
             AnnouncementModifier.PUBLIC -> Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
             AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }

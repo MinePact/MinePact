@@ -31,7 +31,7 @@ fun warnEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Emb
             "**Expires**: ${formatDate(punishment.expiresAt)}",
             "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
         ),
-        colour = 0xECFF85,
+        colour = 0xFFFF00,
         fields = listOf(),
         thumbnail = null,
         image = null,
@@ -49,10 +49,10 @@ fun unwarnEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = E
             else SERVER.info.name
         }",
         "**Staff**: ${punishment.issuerName}",
-        "**Reason**: ${punishment.reason}",
+        "**Reason**: ${punishment.revertReason}",
         "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
     ),
-    colour = 0xF1F1A1,
+    colour = 0xFFFF99,
     fields = listOf(),
     thumbnail = null,
     image = null,

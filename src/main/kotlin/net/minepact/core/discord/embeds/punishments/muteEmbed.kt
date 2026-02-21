@@ -31,7 +31,7 @@ fun muteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Emb
             "**Expires**: ${formatDate(punishment.expiresAt)}",
             "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
         ),
-        colour = 0x88A6FF,
+        colour = 0xFFA200,
         fields = listOf(),
         thumbnail = null,
         image = null,
@@ -49,10 +49,10 @@ fun unmuteEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = E
             else SERVER.info.name
         }",
         "**Staff**: ${punishment.issuerName}",
-        "**Reason**: ${punishment.reason}",
+        "**Reason**: ${punishment.revertReason}",
         "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
     ),
-    colour = 0x78F2B9,
+    colour = 0xFFCB70,
     fields = listOf(),
     thumbnail = null,
     image = null,

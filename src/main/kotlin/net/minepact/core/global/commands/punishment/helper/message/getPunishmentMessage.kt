@@ -13,8 +13,17 @@ fun getPunishmentMessage(punishment: Punishment, announcement: AnnouncementModif
     val config: PunishmentConfig = ConfigurationRegistry.get(PunishmentConfig::class)
 
     when (punishment.type) {
+        PunishmentType.IP_BAN -> {
+            return config.ipBan.message.joinToString(separator = "\n")
+                .replace("{REASON}", punishment.reason)
+                .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
+                .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
+                .replace("{TARGET}", punishment.targetName)
+                .replace("{ISSUER}", punishment.issuerName)
+                .replace("{BCST_MOD}", announcement.value)
+        }
         PunishmentType.BAN -> {
-            return config.ban.kickMessage.joinToString(separator = "\n")
+            return config.ban.message.joinToString(separator = "\n")
                 .replace("{REASON}", punishment.reason)
                 .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
                 .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
@@ -23,7 +32,7 @@ fun getPunishmentMessage(punishment: Punishment, announcement: AnnouncementModif
                 .replace("{BCST_MOD}", announcement.value)
         }
         PunishmentType.MUTE -> {
-            return config.mute.muteMessage.joinToString(separator = "\n")
+            return config.mute.message.joinToString(separator = "\n")
                 .replace("{REASON}", punishment.reason)
                 .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
                 .replace("{EXPIRES_IN}", if (punishment.expiresAt != Long.MIN_VALUE) formatDuration(punishment.expiresAt - System.currentTimeMillis()) else "Never")
@@ -32,10 +41,17 @@ fun getPunishmentMessage(punishment: Punishment, announcement: AnnouncementModif
                 .replace("{BCST_MOD}", announcement.value)
         }
         PunishmentType.WARN -> {
-            return config.warn.warnMessage.joinToString(separator = "\n")
+            return config.warn.message.joinToString(separator = "\n")
                 .replace("{REASON}", punishment.reason)
                 .replace("{EXPIRES_AT}", formatDate(punishment.expiresAt))
                 .replace("{EXPIRES_IN}", formatDuration(punishment.expiresAt - System.currentTimeMillis()))
+                .replace("{TARGET}", punishment.targetName)
+                .replace("{ISSUER}", punishment.issuerName)
+                .replace("{BCST_MOD}", announcement.value)
+        }
+        PunishmentType.KICK -> {
+            return config.kick.message.joinToString(separator = "\n")
+                .replace("{REASON}", punishment.reason)
                 .replace("{TARGET}", punishment.targetName)
                 .replace("{ISSUER}", punishment.issuerName)
                 .replace("{BCST_MOD}", announcement.value)

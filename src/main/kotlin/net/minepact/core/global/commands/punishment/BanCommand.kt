@@ -11,11 +11,12 @@ import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.messages.send
-import net.minepact.api.punishment.modifier.PunishmentModifier
+import net.minepact.api.misc.formatDate
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.core.discord.embeds.punishments.banEmbed
+import net.minepact.core.discord.embeds.punishments.ipbanEmbed
 import net.minepact.core.global.commands.punishment.helper.createPunishment
 import net.minepact.core.global.commands.punishment.helper.extractRawTokens
 import net.minepact.core.global.commands.punishment.helper.message.getPunishmentBroadcast
@@ -25,14 +26,14 @@ import net.minepact.core.global.commands.punishment.helper.parseReason
 import net.minepact.core.global.commands.punishment.helper.resolveAnnouncementModifier
 import net.minepact.core.global.commands.punishment.helper.resolveScopeModifier
 import net.minepact.core.global.commands.punishment.helper.retrieveModifiers
+import net.minepact.core.global.commands.punishment.helper.revertPunishment
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerKickEvent
 import kotlin.String
 
-@Suppress("unused")
-class BanCommand : Command( // /ban <player> 1d Ban Evasion -s
+class BanCommand : Command(
     name = "ban",
     description = "Bans a player from the server.",
     permission = "minepact.punishments.ban",
@@ -77,17 +78,31 @@ class BanCommand : Command( // /ban <player> 1d Ban Evasion -s
             scope = scope
         )
 
-        PunishmentRepository.insert(punishment)
-        val targetMessage: String = getPunishmentMessage(punishment, announcement)
-        val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
+        PunishmentRepository.findActiveByTargetAndType(targetName, PunishmentType.BAN).thenAccept { activeBan ->
+            if (activeBan != null && activeBan.expiresAt >= expiresAt && expiresAt != Long.MIN_VALUE) {
+                sender.send("<white>$targetName <red>is already banned. Their current ban expires at <white>${formatDate(activeBan.expiresAt)}<red>.")
+                return@thenAccept
+            }
 
-        target?.kick(MiniMessage.miniMessage().deserialize(targetMessage), PlayerKickEvent.Cause.BANNED)
-        when (announcement) {
-            AnnouncementModifier.PUBLIC -> Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
-            AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
+            if (activeBan != null && activeBan.expiresAt < expiresAt) {
+                val reverted = revertPunishment(activeBan, sender.name, "OTHER_BAN_OVERRIDE")
+                PunishmentRepository.insert(reverted)
+            }
+
+            PunishmentRepository.insert(punishment)
+            val broadcastMessage: String = getPunishmentBroadcast(punishment, announcement)
+
+            Bukkit.getScheduler().runTask(Main.instance) { _ ->
+                target?.kick(MiniMessage.miniMessage().deserialize(getPunishmentMessage(punishment, announcement)), PlayerKickEvent.Cause.BANNED)
+            }
+            when (announcement) {
+                AnnouncementModifier.PUBLIC -> Bukkit.getOnlinePlayers().forEach { it.send(broadcastMessage) }
+                AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
+            }
+
+            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(ipbanEmbed(punishment, listOf(scope, announcement))))
         }
 
-        Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(banEmbed(punishment, listOf(scope, announcement))))
         return Result.SUCCESS
     }
 }

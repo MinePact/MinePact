@@ -13,7 +13,7 @@ class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig>
         /* TODO: Database reload logic */
     }
 
-    var default_announcement_status_modifier: String = AnnouncementModifier.PUBLIC.name
+    var default_announcement_status_modifier: String = AnnouncementModifier.SILENT.name
     var default_punishment_scope_modifier: String = ScopeModifier.LOCAL.name
 
     var webhookUrl: String = ""

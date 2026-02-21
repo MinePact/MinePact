@@ -9,10 +9,8 @@ import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerData
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
-import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -40,14 +38,19 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         }
 
         PlayerRegistry.get(event.player.uniqueId).thenAccept { it.online = true }
-        val potentialPunishments = PunishmentRepository.findByTarget(event.player.name)
+        PunishmentRepository.findByTarget(event.player.name).thenAccept { punishments ->
+            val activeBan = punishments.firstOrNull { punishment ->
+                        punishment.type == PunishmentType.BAN
+                        && !punishment.reverted
+                        && System.currentTimeMillis() < punishment.expiresAt
+                        && punishment.targetServers.contains(Main.SERVER.info.uuid)
+            }
 
-        potentialPunishments.get().forEach { punishment -> run {
-                if ((System.currentTimeMillis() > punishment.expiresAt) && (punishment.expiresAt != Long.MIN_VALUE)) return@run
-                if (punishment.type != PunishmentType.BAN) return@run
-                if (event.player.hasPermission("minepact.punishments.bypass.${punishment.type.name.lowercase()}")) return@run
-
-                event.player.kick(MiniMessage.miniMessage().deserialize(getPunishmentMessage(punishment, AnnouncementModifier.SILENT)), PlayerKickEvent.Cause.BANNED)
+            if (activeBan != null) {
+                event.player.kick(
+                    MiniMessage.miniMessage().deserialize(getPunishmentMessage(activeBan, AnnouncementModifier.SILENT)),
+                    PlayerKickEvent.Cause.BANNED
+                )
             }
         }
 

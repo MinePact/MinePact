@@ -18,10 +18,8 @@ abstract class Repository<T> {
 
     fun ensureTableExists() {
         val sql = table().createEnsureScript()
-        database.update(sql).thenAccept {
-            Main.instance.logger.info {
-                "[${this.javaClass.simpleName}] Table created if not found."
-            }
+        database.update(sql, listOf()).thenAccept {
+            Main.instance.logger.info { "[${this.javaClass.simpleName}] Table created if not found." }
         }
     }
 
@@ -62,7 +60,7 @@ abstract class Repository<T> {
         )
     }
     fun deleteAll(): CompletableFuture<Int> {
-        return database.update("DELETE FROM ${tableName()}")
+        return database.update("DELETE FROM ${tableName()}", listOf())
     }
 
     protected fun <T> querySingle(

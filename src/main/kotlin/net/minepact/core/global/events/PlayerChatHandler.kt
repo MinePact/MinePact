@@ -7,6 +7,7 @@ import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.messages.send
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
+import net.minepact.core.global.commands.punishment.helper.message.getMuteAttemptMessage
 import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
 import org.bukkit.event.player.PlayerChatEvent
 import kotlin.collections.forEach
@@ -23,8 +24,10 @@ class PlayerChatHandler : SimpleEventHandler<PlayerChatEvent>() {
             if (punishment.type != PunishmentType.MUTE) return@run
             if (event.player.hasPermission("minepact.punishments.bypass.${punishment.type.name.lowercase()}")) return@run
 
-            event.isCancelled = true
-            player.send(getPunishmentMessage(punishment, AnnouncementModifier.SILENT))
+            if (!punishment.reverted && punishment.targetServers.contains(Main.SERVER.info.uuid)) {
+                event.isCancelled = true
+                player.send(getMuteAttemptMessage(punishment))
+            }
         } }
 
         event.format = "${player.name}: $message"

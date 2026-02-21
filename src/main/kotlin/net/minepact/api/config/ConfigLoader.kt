@@ -26,11 +26,9 @@ object ConfigLoader {
     fun save(config: ConfigurationFile) {
         val file = File(Main.instance.dataFolder, config.fileName)
         Main.instance.dataFolder.mkdirs()
+
         file.bufferedWriter().use { writer ->
-            config::class.findAnnotation<Comment>()?.let {
-                writer.write("# ${it.value}\n\n")
-            }
-            writeObject(writer, config, 0)
+            writeObject(writer, config)
         }
     }
 
@@ -40,34 +38,27 @@ object ConfigLoader {
                 writer.write("# ${it.value}\n\n")
             }
 
-            writeObject(writer, config, 0)
+            writeObject(writer, config)
         }
     }
     private fun writeObject(
         writer: BufferedWriter,
         obj: Any,
-        indent: Int
+        prefix: String = ""
     ) {
-        val prefix = "  ".repeat(indent)
+        val fields = obj::class.java.declaredFields
 
-        for (prop in obj::class.memberProperties) {
-            if (prop !is KMutableProperty1) continue
+        for (field in fields) {
+            field.isAccessible = true
 
-            val value = prop.getter.call(obj)
-            val comment = prop.findAnnotation<Comment>()
+            val value = field.get(obj)
+            val name = field.name
 
             if (isSimple(value)) {
-                comment?.let {
-                    writer.write("$prefix# ${it.value}\n")
-                }
-                writer.write("$prefix${prop.name}: ${serialize(value)}\n\n")
-            } else {
-                comment?.let {
-                    writer.write("$prefix# ${it.value}\n")
-                }
-                writer.write("$prefix${prop.name}:\n")
-                writeObject(writer, value!!, indent + 1)
-                writer.write("\n")
+                writer.write("$prefix$name: ${serializeFlat(value)}")
+                writer.newLine()
+            } else if (value != null) {
+                writeObject(writer, value, "$prefix$name.")
             }
         }
     }
@@ -123,9 +114,13 @@ object ConfigLoader {
                     "${serialize(it.key)}: ${serialize(it.value)}"
                 }
             }
-            is UUID -> {
-                "\"${value.toString()}\""
-            }
+            is UUID -> { "\"$value\"" }
+            else -> value.toString()
+        }
+    private fun serializeFlat(value: Any?): String =
+        when (value) {
+            null -> "null"
+            is UUID -> value.toString()
             else -> value.toString()
         }
 

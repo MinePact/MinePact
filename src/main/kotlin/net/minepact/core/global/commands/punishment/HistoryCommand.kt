@@ -24,7 +24,7 @@ class HistoryCommand : Command(
     usage = CommandUsage(
         label = "history", arguments = listOf(
             ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS),
-            ExpectedArgument(name = "limit", potentialValues = listOf("10", "20", "30"), inputType = ArgumentInputType.INTEGER, optional = true)
+            ExpectedArgument(name = "limit", potentialValues = listOf("10", "20", "30"), inputType = ArgumentInputType.STRING, optional = true)
         )
     ),
     cooldown = 1.0
@@ -33,11 +33,11 @@ class HistoryCommand : Command(
         sender: CommandSender,
         args: MutableList<Argument<*>>
     ): Result {
-        val repo: PunishmentRepository = PunishmentRepository
         val target: String = args[0].value as String
-        val limit: Int = args[1].value as Int
+        val limit: Int = Integer.parseInt(args[1].value as String? ?: "10")
 
-        var punishments: List<Punishment> = repo.findByTarget(target).get()
+        var punishments: List<Punishment> = PunishmentRepository.findByTarget(target).get()
+        sender.send("")
         sender.send("<green>Last $limit punishments for <white>$target<green>:")
         if (punishments.isEmpty()) sender.send("<yellow>| <red>No punishments found :(")
 
@@ -48,6 +48,9 @@ class HistoryCommand : Command(
     }
 
     fun format(punishments: List<Punishment>): List<String> {
-        return punishments.map { punishment -> "<yellow>| <grey>[<white>${formatDateShort(punishment.punishedAt)}<grey>] <green>${if(punishment.type == PunishmentType.BAN) "Banned" else if (punishment.type == PunishmentType.MUTE) "Muted" else "Warned"} <green>by <white>${punishment.issuerName} <green>for <white>${punishment.reason} <green>for <white>${formatDuration(punishment.expiresAt - punishment.punishedAt)}<green>. ${if (System.currentTimeMillis() > punishment.expiresAt) "<dark_grey>[<grey>Expired<dark_grey>]" else ""}" }
+        return punishments.map { punishment ->
+            if (punishment.type != PunishmentType.KICK) "<yellow>| <grey>[<white>${formatDateShort(punishment.punishedAt)}<grey>] <green>${if(punishment.type == PunishmentType.BAN) "Banned" else if (punishment.type == PunishmentType.MUTE) "Muted" else "Warned"} <green>by <white>${punishment.issuerName} <green>for <white>${punishment.reason} <green>for <white>${formatDuration(punishment.expiresAt - punishment.punishedAt)}<green>. ${if (System.currentTimeMillis() > punishment.expiresAt) "<dark_grey>[<grey>Expired<dark_grey>]" else ""}"
+            else "<yellow>| <grey>[<white>${formatDateShort(punishment.punishedAt)}<grey>] <green>Kicked by <white>${punishment.issuerName} <green>for <white>${punishment.reason}"
+        }
     }
 }

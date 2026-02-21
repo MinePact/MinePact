@@ -104,7 +104,5 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
     override fun onDisable() {
         if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))
         else UPDATES_WEBHOOK.sendMessage("", listOf(stopEmbed()))
-
-        SyncCodeRepository.deleteAll()
     }
 }

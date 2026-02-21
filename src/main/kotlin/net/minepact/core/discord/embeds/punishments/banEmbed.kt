@@ -49,10 +49,10 @@ fun unbanEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Em
             else SERVER.info.name
         }",
         "**Staff**: ${punishment.issuerName}",
-        "**Reason**: ${punishment.reason}",
+        "**Reason**: ${punishment.revertReason}",
         "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
     ),
-    colour = 0xEC5AAD,
+    colour = 0xFFA6A6,
     fields = listOf(),
     thumbnail = null,
     image = null,

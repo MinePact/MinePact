@@ -15,6 +15,7 @@ import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.core.discord.embeds.punishments.kickEmbed
 import net.minepact.core.discord.embeds.punishments.unbanEmbed
+import net.minepact.core.discord.embeds.punishments.unipbanEmbed
 import net.minepact.core.global.commands.punishment.helper.extractRawTokens
 import net.minepact.core.global.commands.punishment.helper.message.getRevokalMessage
 import net.minepact.core.global.commands.punishment.helper.parseReason
@@ -24,10 +25,10 @@ import net.minepact.core.global.commands.punishment.helper.revertPunishment
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 
-class UnbanCommand : Command(
-    name = "unban",
-    description = "Unban a player",
-    usage = CommandUsage(label = "unban", arguments = listOf(
+class UnIpBanCommand : Command(
+    name = "un-ipban",
+    description = "",
+    usage = CommandUsage(label = "un-ipban", arguments = listOf(
         ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS, inputType = ArgumentInputType.STRING),
         ExpectedArgument(name = "reason", inputType = ArgumentInputType.STRING, optional = true),
         ExpectedArgument(name = "modifiers", dynamicProvider = Provider.EMPTY, optional = true)
@@ -46,9 +47,9 @@ class UnbanCommand : Command(
         val reason = parseReason(rawTokens)
         val announcement: AnnouncementModifier = resolveAnnouncementModifier(modifiers)
 
-        PunishmentRepository.findActiveByTargetAndType(targetName, PunishmentType.BAN).thenAccept { ban ->
+        PunishmentRepository.findActiveByTargetAndType(targetName, PunishmentType.IP_BAN).thenAccept { ban ->
             if (ban == null) {
-                sender.send("<red>No active ban found for <white>$targetName")
+                sender.send("<red>No active ip-ban found for <white>$targetName")
                 return@thenAccept
             }
 
@@ -60,7 +61,7 @@ class UnbanCommand : Command(
                 AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(getRevokalMessage(ban, AnnouncementModifier.PUBLIC)) }
             }
 
-            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(unbanEmbed(ban, listOf(ScopeModifier.GLOBAL, announcement))))
+            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(unipbanEmbed(ban, listOf(ScopeModifier.GLOBAL, announcement))))
         }
 
         return Result.SUCCESS
