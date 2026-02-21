@@ -11,6 +11,7 @@ object PlayerRepository : Repository<PlayerData>() {
     override fun table() = TableBuilder("players")
         .column("uuid", DataType.UUID, primaryKey = true)
         .column("name", DataType.STRING, nullable = false)
+        .column("ip_history", DataType.STRING, nullable = false)
         .column("discordId", DataType.STRING, nullable = true)
         .column("nick", DataType.STRING, nullable = false)
         .column("chat_colour", DataType.INT, nullable = false)
@@ -20,6 +21,7 @@ object PlayerRepository : Repository<PlayerData>() {
     override fun map(rs: ResultSet): PlayerData = PlayerData(
             uuid = UUID.fromString(rs.getString("uuid")),
             name = rs.getString("name"),
+            ipHistory = rs.getString("ip_history").replace("[", "").replace("]", "").split(","),
             discordId = rs.getString("discordId"),
             nick = rs.getString("nick"),
             chatColour = rs.getInt("chat_colour"),
@@ -30,6 +32,7 @@ object PlayerRepository : Repository<PlayerData>() {
         return listOf(
             entity.uuid.toString(),
             entity.name,
+            entity.ipHistory,
             entity.discordId,
             entity.nick,
             entity.chatColour,
@@ -48,6 +51,12 @@ object PlayerRepository : Repository<PlayerData>() {
         querySingle(
             "SELECT * FROM players WHERE LOWER(name) = ?",
             listOf(name),
+            ::map
+        )
+    fun findByIP(ip: String): CompletableFuture<List<PlayerData>> =
+        queryList(
+            "SELECT * FROM players WHERE ip_history LIKE ?",
+            listOf("%$ip%"),
             ::map
         )
 }

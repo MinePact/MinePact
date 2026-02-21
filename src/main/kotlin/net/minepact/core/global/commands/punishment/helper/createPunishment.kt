@@ -19,11 +19,17 @@ fun createPunishment(
     val servers = if (scope == ScopeModifier.GLOBAL) ServerRepository.findAll().get()
     else listOf(Main.SERVER.info)
 
+    val targetIp: String? = null
+    if (type == PunishmentType.IP_BAN) {
+
+    }
+
     return Punishment(
         id = Punishment.generateId(),
         targetServers = servers.map { it.uuid },
         type = type,
         targetName = targetName,
+        targetIp = targetIp,
         issuerName = sender.name,
         reason = reason,
         punishedAt = System.currentTimeMillis(),

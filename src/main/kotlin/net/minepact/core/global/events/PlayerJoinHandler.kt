@@ -20,34 +20,53 @@ import org.bukkit.event.player.PlayerKickEvent
 class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
     override fun handle(context: EventContext<PlayerJoinEvent>) {
         val event: PlayerJoinEvent = context.event
-        event.joinMessage(MiniMessage.miniMessage().deserialize("<dark_grey>[<green><bold>+</bold><dark_grey>] <grey>${event.player.name}"))
-        if (PlayerRepository.findByUUID(event.player.uniqueId).get() == null) {
-            val newData = PlayerData(
-                uuid = event.player.uniqueId,
-                name = event.player.name,
+        val player = event.player
+        val uuid = player.uniqueId
+        val currentIp = player.address?.address?.hostAddress
+
+        event.joinMessage(MiniMessage.miniMessage().deserialize("<dark_grey>[<green><bold>+</bold><dark_grey>] <grey>${player.name}"))
+
+        val optional = PlayerRepository.findByUUID(uuid)
+        val data: PlayerData
+
+        if (optional.get() == null) {
+            data = PlayerData(
+                uuid = uuid,
+                name = player.name,
+                ipHistory = currentIp?.let { listOf(it) } ?: listOf(),
                 discordId = "",
                 firstJoined = System.currentTimeMillis(),
                 lastSeen = System.currentTimeMillis()
             )
-            PlayerRepository.insert(newData)
-
-            if (!PlayerRegistry.playersByUUID.containsKey(event.player.uniqueId)) PlayerRegistry.register(Player(newData, true))
+            PlayerRepository.insert(data)
         } else {
-            val data = PlayerRepository.findByUUID(event.player.uniqueId).get() ?: return
-            if (!PlayerRegistry.playersByUUID.containsKey(event.player.uniqueId)) PlayerRegistry.register(Player(data, true))
+            data = optional.get() ?: return
+            if (currentIp != null && !data.ipHistory.contains(currentIp)) {
+                val updatedIps = data.ipHistory + currentIp
+                data.ipHistory = updatedIps
+                PlayerRepository.insert(data)
+            }
+
+            data.lastSeen = System.currentTimeMillis()
+            PlayerRepository.insert(data)
         }
 
-        PlayerRegistry.get(event.player.uniqueId).thenAccept { it.online = true }
-        PunishmentRepository.findByTarget(event.player.name).thenAccept { punishments ->
+        if (!PlayerRegistry.playersByUUID.containsKey(uuid)) {
+            PlayerRegistry.register(Player(data, true))
+        }
+
+        PlayerRegistry.get(uuid).thenAccept { it.online = true }
+
+        PunishmentRepository.findByTarget(player.name).thenAccept { punishments ->
             val activeBan = punishments.firstOrNull { punishment ->
-                        punishment.type == PunishmentType.BAN
-                        && !punishment.reverted
-                        && System.currentTimeMillis() < punishment.expiresAt
-                        && punishment.targetServers.contains(Main.SERVER.info.uuid)
+                punishment.type == PunishmentType.BAN &&
+                        !punishment.reverted &&
+                        System.currentTimeMillis() < punishment.expiresAt &&
+                        punishment.targetServers.contains(Main.SERVER.info.uuid)
             }
 
             if (activeBan != null) {
-                event.player.kick(
+                player.kick(
                     MiniMessage.miniMessage().deserialize(getPunishmentMessage(activeBan, AnnouncementModifier.SILENT)),
                     PlayerKickEvent.Cause.BANNED
                 )
@@ -55,14 +74,16 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         }
 
         if (Main.MAIN_CONFIG.spawn.teleportOnJoin) {
-            event.player.teleport(Location(
-                Bukkit.getWorld(Main.MAIN_CONFIG.spawn.world),
-                Main.MAIN_CONFIG.spawn.x,
-                Main.MAIN_CONFIG.spawn.y,
-                Main.MAIN_CONFIG.spawn.z,
-                Main.MAIN_CONFIG.spawn.yaw,
-                Main.MAIN_CONFIG.spawn.pitch
-            ))
+            player.teleport(
+                Location(
+                    Bukkit.getWorld(Main.MAIN_CONFIG.spawn.world),
+                    Main.MAIN_CONFIG.spawn.x,
+                    Main.MAIN_CONFIG.spawn.y,
+                    Main.MAIN_CONFIG.spawn.z,
+                    Main.MAIN_CONFIG.spawn.yaw,
+                    Main.MAIN_CONFIG.spawn.pitch
+                )
+            )
         }
     }
 }

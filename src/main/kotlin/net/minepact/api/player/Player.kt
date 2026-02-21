@@ -4,7 +4,13 @@ class Player(
     val data: PlayerData,
     var online: Boolean
 ) {
-    fun sync() {
 
+    override fun toString(): String {
+        return """
+            Player[
+                data=$data, 
+                online=$online
+            ]
+        """.trimMargin()
     }
 }

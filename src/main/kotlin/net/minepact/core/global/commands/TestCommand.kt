@@ -38,7 +38,7 @@ class TestCommand : Command(
         sender: CommandSender,
         args: MutableList<Argument<*>>
     ): Result {
-        PlayerRegistry.get(args[0].value as String).thenAccept { player -> sender.send("<green>Found ${if (player.online) "Online" else "Offline"} Player[uuid: '${player.data.uuid}', name: '${player.data.name}']") }
+        PlayerRegistry.get(args[0].value as String).thenAccept { player -> sender.send(player.toString()) }
         return Result.SUCCESS
     }
 }

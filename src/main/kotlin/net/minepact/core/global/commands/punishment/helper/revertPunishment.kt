@@ -10,6 +10,7 @@ fun revertPunishment(punishment: Punishment, revertedBy: String, revertReason: S
         targetServers = punishment.targetServers,
         type = punishment.type,
         targetName = punishment.targetName,
+        targetIp = punishment.targetIp,
         issuerName = punishment.issuerName,
         reason = punishment.reason,
         punishedAt = punishment.punishedAt,
@@ -17,10 +18,9 @@ fun revertPunishment(punishment: Punishment, revertedBy: String, revertReason: S
         reverted = true,
         revertedBy = revertedBy,
         revertedAt = System.currentTimeMillis(),
-        revertReason = revertReason
+        revertReason = revertReason,
     )
 }
-
 fun revertPunishmentById(id: UUID, revertedBy: String, revertReason: String) {
     PunishmentRepository.findByID(id).thenAccept { punishments ->
         punishments.firstOrNull()?.let { punishment ->

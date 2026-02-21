@@ -29,6 +29,7 @@ object PunishmentRepository : Repository<Punishment>() {
         targetServers = rs.getString("servers").split(",").filter { it.isNotEmpty() }.map { UUID.fromString(it) },
         type = PunishmentType.valueOf(rs.getString("type")),
         targetName = rs.getString("target"),
+        targetIp = rs.getString("target_ip").takeIf { it.isNotEmpty() },
         issuerName = rs.getString("issuer"),
         reason = rs.getString("reason"),
         punishedAt = rs.getLong("punished_at"),
