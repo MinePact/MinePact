@@ -1,20 +1,14 @@
 package net.minepact.core.global.commands
 
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
-import net.minepact.Main
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ArgumentInputType
-import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.messages.send
-import net.minepact.core.global.menues.ExampleMenu
-import org.bukkit.Particle
+import net.minepact.api.messages.MessageBuilder
+import net.minepact.api.misc.formatDate
+import net.minepact.api.player.PlayerRegistry
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.util.Vector
 
 class TestCommand : Command(
     name = "test",
@@ -23,7 +17,7 @@ class TestCommand : Command(
     aliases = mutableListOf(""),
     usage = CommandUsage(
         label = "test",
-        arguments = emptyList()
+        arguments = listOf()
     ),
     cooldown = 1.0,
     playerOnly = true
@@ -32,7 +26,18 @@ class TestCommand : Command(
         sender: CommandSender,
         args: MutableList<Argument<*>>
     ): Result {
-        ExampleMenu().open(sender as Player)
+        PlayerRegistry.get((sender as Player).uniqueId).thenAccept { player -> run {
+            player.sendMessage(MessageBuilder()
+                .append("<green>Player Info for <white>${player.data.name} <grey><i>(Hover)") {
+                    this.hoverText(
+                        "<dark_red><b>Name: <grey>${player.data.name}",
+                        "<dark_red><b>Unique ID: <grey>${player.data.uuid}",
+                        "<dark_red><b>Discord ID: <grey>${if (player.data.discordId == "") "Not Synced" else player.data.discordId}",
+                        "<dark_red><b>First Played: <grey>${formatDate(player.data.firstJoined)}",
+                        "<dark_red><b>Last IP: <grey>${player.data.ipHistory.last()}"
+                    )
+                }.build())
+        } }
         return Result.SUCCESS
     }
 }

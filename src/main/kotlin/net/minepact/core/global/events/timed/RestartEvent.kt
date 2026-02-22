@@ -57,7 +57,7 @@ class RestartEvent(
         val timeLeft: String = TimeInterval.format(time)
 
         player.showTitle(Title.title(
-            MiniMessage.miniMessage().deserialize("<green>Restarting in: <red><b>${timeLeft}</b>!"),
+            MiniMessage.miniMessage().deserialize("<green>Restarting in: <red><b>${timeLeft}</b>"),
             MiniMessage.miniMessage().deserialize("")
         ))
     }

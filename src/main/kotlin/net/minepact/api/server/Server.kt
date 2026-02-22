@@ -2,6 +2,7 @@ package net.minepact.api.server
 
 import net.minepact.Main
 import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.data.repository.ServerRepository
 import net.minepact.core.global.configs.ServerConfig
 import org.bukkit.Bukkit
 import java.util.UUID
@@ -36,7 +37,7 @@ class Server(
         Main.instance.logger.info("[Server] Type: ${info.type}")
         Main.instance.logger.info("[Server] Staging: ${info.staging}")
 
-        Main.SERVER_REPOSITORY.insert(info).thenAccept { Main.instance.logger.info("[Server] Updated database!") }
+        ServerRepository.insert(info).thenAccept { Main.instance.logger.info("[Server] Updated database!") }
         Main.instance.logger.info("")
     }
 

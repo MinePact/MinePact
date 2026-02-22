@@ -1,7 +1,9 @@
 package net.minepact.api.punishment
 
 enum class PunishmentType {
+    KICK,
     WARN,
     MUTE,
-    BAN;
+    BAN,
+    IP_BAN;
 }

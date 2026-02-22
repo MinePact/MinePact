@@ -6,8 +6,6 @@ import net.minepact.api.data.Database
 import net.minepact.api.data.DatabaseConfig
 import net.minepact.api.data.DatabaseFactory
 import net.minepact.api.data.DatabaseProvider
-import net.minepact.api.data.repository.PunishmentRepository
-import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.discord.Webhook
 import net.minepact.api.event.BukkitEventBridge
 import net.minepact.api.event.EventRegister
@@ -15,17 +13,16 @@ import net.minepact.api.menu.MenuManager
 import net.minepact.api.misc.Constants
 import net.minepact.api.reflections.findCommands
 import net.minepact.api.reflections.findEvents
+import net.minepact.api.reflections.findRepositories
 import net.minepact.api.reflections.registerConfigs
-import net.minepact.api.schedular.EventSchedular
+import net.minepact.api.schedular.EventScheduler
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.restartEmbed
 import net.minepact.core.discord.embeds.startEmbed
 import net.minepact.core.discord.embeds.stopEmbed
 import net.minepact.core.global.configs.PluginConfig
 import net.minepact.core.global.configs.ServerConfig
-import net.minepact.core.global.events.timed.UpdateServerListEvent
-
-import java.net.URL
+import net.minepact.core.global.events.timed.RestartEvent
 import kotlin.Boolean
 import kotlin.Long
 import kotlin.properties.Delegates
@@ -41,8 +38,6 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         lateinit var DATABASE_CONFIG: DatabaseConfig
         lateinit var DATABASE: Database
-        lateinit var SERVER_REPOSITORY: ServerRepository
-        lateinit var PUNISHMENT_REPOSITORY: PunishmentRepository
 
         lateinit var UPDATES_WEBHOOK: Webhook
         lateinit var LOGGING_WEBHOOK: Webhook
@@ -72,8 +67,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
             filePath = "mpdb.sqlite" // Fallback
         )
         DATABASE = DatabaseFactory.create(DATABASE_CONFIG)
-        SERVER_REPOSITORY = ServerRepository()
-        PUNISHMENT_REPOSITORY = PunishmentRepository()
+        findRepositories("net.minepact.api.data.repository").forEach { it.ensureTableExists() }
 
         SERVER = Server()
 
@@ -101,7 +95,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
     override fun onEnable() {
         BukkitEventBridge(EVENT_REGISTRY).registerAllEvents()
 
-        EventSchedular.startTimedEvent(UpdateServerListEvent())
+        EventScheduler.startTimedEvent(RestartEvent())
 
         MenuManager.initialize()
     }
