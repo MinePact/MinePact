@@ -6,7 +6,6 @@ import net.minepact.api.data.Database
 import net.minepact.api.data.DatabaseConfig
 import net.minepact.api.data.DatabaseFactory
 import net.minepact.api.data.DatabaseProvider
-import net.minepact.api.data.repository.SyncCodeRepository
 import net.minepact.api.discord.Webhook
 import net.minepact.api.event.BukkitEventBridge
 import net.minepact.api.event.EventRegister
@@ -16,14 +15,14 @@ import net.minepact.api.reflections.findCommands
 import net.minepact.api.reflections.findEvents
 import net.minepact.api.reflections.findRepositories
 import net.minepact.api.reflections.registerConfigs
-import net.minepact.api.schedular.EventSchedular
+import net.minepact.api.schedular.EventScheduler
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.restartEmbed
 import net.minepact.core.discord.embeds.startEmbed
 import net.minepact.core.discord.embeds.stopEmbed
 import net.minepact.core.global.configs.PluginConfig
 import net.minepact.core.global.configs.ServerConfig
-import net.minepact.core.global.events.timed.UpdateServerListEvent
+import net.minepact.core.global.events.timed.RestartEvent
 import kotlin.Boolean
 import kotlin.Long
 import kotlin.properties.Delegates
@@ -96,7 +95,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
     override fun onEnable() {
         BukkitEventBridge(EVENT_REGISTRY).registerAllEvents()
 
-        EventSchedular.startTimedEvent(UpdateServerListEvent())
+        EventScheduler.startTimedEvent(RestartEvent())
 
         MenuManager.initialize()
     }

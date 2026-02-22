@@ -4,9 +4,8 @@ import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.schedular.EventSchedular
+import net.minepact.api.schedular.EventScheduler
 import net.minepact.api.schedular.TimeInterval
 import net.minepact.api.schedular.TimedEvent
 import net.minepact.core.global.events.timed.RestartEvent
@@ -19,12 +18,7 @@ class RestartCommand : Command(
     aliases = mutableListOf(""),
     usage = CommandUsage(
         label = "restart", arguments = listOf(
-            ExpectedArgument(
-                name = "cancelled",
-                potentialValues = listOf("cancel"),
-                inputType = ArgumentInputType.STRING,
-                optional = true,
-            )
+            ExpectedArgument(name = "cancelled", potentialValues = listOf("cancel"), optional = true,)
         )
     ),
     cooldown = 1.0,
@@ -35,14 +29,13 @@ class RestartCommand : Command(
     ): Result {
         if (args.isNotEmpty()) {
             if (args[0].value == "cancel") {
-                EventSchedular.RUNNING_EVENTS.filter { (_, value) -> value.javaClass == RestartEvent().javaClass }.values.last()
-                    .cancel()
+                EventScheduler.RUNNING_EVENTS.filter { (_, value) -> value.javaClass == RestartEvent().javaClass }.values.last().cancel()
                 return Result.SUCCESS
             }
         }
 
         val event: TimedEvent = RestartEvent(5 * TimeInterval.SECOND)
-        EventSchedular.execute(event)
+        EventScheduler.execute(event)
         return Result.SUCCESS
     }
 }
