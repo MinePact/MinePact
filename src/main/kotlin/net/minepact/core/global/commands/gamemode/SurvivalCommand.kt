@@ -7,15 +7,16 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
+import net.minepact.api.player.Player
+import net.minepact.api.player.permissions.Permission
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
-import org.bukkit.command.CommandSender
 
 class SurvivalCommand : Command(
     name = "survival",
     aliases = mutableListOf("gms", "gmsurvival", "gamemodesurvival"),
     description = "Creates a player's game as a game for survival.",
-    permission = "",
+    permission = Permission("minepact.gamemode.survival"),
     playerOnly = true,
     usage = CommandUsage(
         label = "survival", arguments = listOf(
@@ -24,16 +25,22 @@ class SurvivalCommand : Command(
     ),
 ) {
     override fun execute(
-        sender: CommandSender,
+        sender: Player,
         args: MutableList<Argument<*>>
     ): Result {
         try {
-            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.name
+            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.data.name
             val target = Bukkit.getPlayerExact(targetName)!!
             target.gameMode = GameMode.SURVIVAL
+
+            if (sender.asPlayer() == target) sender.sendMessage("<green>You are now in <yellow>survival <green>mode.")
+            else {
+                sender.sendMessage("<green>${target.name} is now in <yellow>survival <green>mode.")
+                target.sendMessage("<green>You are now in <yellow>survival <green>mode.")
+            }
             return Result.SUCCESS
-        }catch (_: NullPointerException) {
-            sender.send("<red>Player not found.")
+        } catch (e: NullPointerException) {
+            sender.sendMessage("<red>Player not found.")
             return Result.FAILURE
         }
     }

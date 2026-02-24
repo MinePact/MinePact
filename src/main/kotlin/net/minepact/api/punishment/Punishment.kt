@@ -3,35 +3,29 @@ package net.minepact.api.punishment
 import java.util.UUID
 
 class Punishment(
-    val id: UUID,
-    val targetServers: List<UUID>,
+    val id: UUID = UUID.randomUUID(),
+    val servers: List<UUID>,
     val type: PunishmentType,
-    val targetName: String,
+    val target: UUID,
     val targetIp: String?,
-    val issuerName: String,
+    val issuer: UUID,
     val reason: String,
     val punishedAt: Long,
     val expiresAt: Long,
     val reverted: Boolean = false,
-    val revertedBy: String? = null,
+    val revertedBy: UUID? = null,
     val revertedAt: Long? = null,
     val revertReason: String? = null
 ) {
-    companion object {
-        fun generateId(): UUID {
-            return UUID.randomUUID()
-        }
-    }
-
     override fun toString(): String {
         return """
             Punishment[
                 id=$id,
-                targetServers=${targetServers.map { it.toString() }},
+                targetServers=${servers.map { it.toString() }},
                 type=${type.name},
-                target=$targetName,
+                target=$target,
                 targetIp=$targetIp,
-                issuer=$issuerName,
+                issuer=$issuer,
                 reason=$reason,
                 punishedAt=$punishedAt,
                 expiresAt=$expiresAt,

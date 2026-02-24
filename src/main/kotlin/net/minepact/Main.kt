@@ -1,5 +1,7 @@
 package net.minepact
 
+import net.luckperms.api.LuckPerms
+
 import net.minepact.api.command.CommandRegister
 import net.minepact.api.config.ConfigurationRegistry
 import net.minepact.api.data.Database
@@ -9,8 +11,11 @@ import net.minepact.api.data.DatabaseProvider
 import net.minepact.api.discord.Webhook
 import net.minepact.api.event.BukkitEventBridge
 import net.minepact.api.event.EventRegister
+import net.minepact.api.item.enchantments.EnchantmentRegistry
 import net.minepact.api.menu.MenuManager
 import net.minepact.api.misc.Constants
+import net.minepact.api.player.Player
+import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.reflections.findCommands
 import net.minepact.api.reflections.findEvents
 import net.minepact.api.reflections.findRepositories
@@ -22,10 +27,12 @@ import net.minepact.core.discord.embeds.startEmbed
 import net.minepact.core.discord.embeds.stopEmbed
 import net.minepact.core.global.configs.PluginConfig
 import net.minepact.core.global.configs.ServerConfig
+import net.minepact.core.global.enchantments.PickaxeEnchantment
+import net.minepact.core.global.events.timed.MotdEvent
 import net.minepact.core.global.events.timed.RestartEvent
-import kotlin.Boolean
-import kotlin.Long
+import org.bukkit.Bukkit
 import kotlin.properties.Delegates
+
 
 class Main : org.bukkit.plugin.java.JavaPlugin() {
     companion object {
@@ -34,14 +41,15 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         lateinit var EVENT_REGISTRY: EventRegister
 
         lateinit var MAIN_CONFIG: PluginConfig
-        lateinit var SERVER: Server
-
         lateinit var DATABASE_CONFIG: DatabaseConfig
+        lateinit var SERVER: Server
         lateinit var DATABASE: Database
 
         lateinit var UPDATES_WEBHOOK: Webhook
         lateinit var LOGGING_WEBHOOK: Webhook
         lateinit var PUNISHMENTS_WEBHOOK: Webhook
+
+        lateinit var LUCKPERMS_API: LuckPerms
 
         var RESTARTING: Boolean = false
         var SERVER_START_TIME by Delegates.notNull<Long>()
@@ -84,8 +92,12 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         )
 
         findCommands("net.minepact.core").forEach { COMMAND_REGISTRY.register(it) }
-        findEvents("net.minepact.core").forEach { EVENT_REGISTRY.register(it) }
+        findEvents("net.minepact").forEach { EVENT_REGISTRY.register(it) }
         registerConfigs("net.minepact.core.global.configs")
+
+        for (e in PickaxeEnchantment.entries) {
+            EnchantmentRegistry.register(e)
+        }
 
         UPDATES_WEBHOOK.sendMessage("", listOf(startEmbed()))
 
@@ -93,9 +105,24 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
     }
 
     override fun onEnable() {
+        val pluginManager = Bukkit.getPluginManager()
+        pluginManager.plugins.forEach { println(it.name)}
+
+        val provider = server.servicesManager.getRegistration(LuckPerms::class.java)
+
+        if (provider == null) {
+            logger.severe("LuckPerms API not found!")
+            server.pluginManager.disablePlugin(this)
+            return
+        }
+
+        LUCKPERMS_API = provider.provider
+
+        PlayerRegistry.register(Player.CONSOLE)
         BukkitEventBridge(EVENT_REGISTRY).registerAllEvents()
 
         EventScheduler.startTimedEvent(RestartEvent())
+        EventScheduler.startTimedEvent(MotdEvent())
 
         MenuManager.initialize()
     }

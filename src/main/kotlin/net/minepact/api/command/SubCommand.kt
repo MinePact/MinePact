@@ -4,6 +4,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import org.bukkit.command.CommandSender
 
+@Deprecated("")
 abstract class SubCommand(
     val name: String,
     val permission: String? = null

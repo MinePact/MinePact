@@ -4,16 +4,16 @@ import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.messages.MessageBuilder
-import net.minepact.api.misc.formatDate
-import net.minepact.api.player.PlayerRegistry
-import org.bukkit.command.CommandSender
+import net.minepact.api.item.Item
+import net.minepact.api.messages.FormatParser
+import net.minepact.api.player.permissions.Permission
+import org.bukkit.Material
 import org.bukkit.entity.Player
 
 class TestCommand : Command(
     name = "test",
     description = "A testing command for the developers.",
-    permission = "minepact.dev.test",
+    permission = Permission("minepact.dev.test"),
     aliases = mutableListOf(""),
     usage = CommandUsage(
         label = "test",
@@ -23,21 +23,20 @@ class TestCommand : Command(
     playerOnly = true
 ) {
     override fun execute(
-        sender: CommandSender,
+        sender: net.minepact.api.player.Player,
         args: MutableList<Argument<*>>
     ): Result {
-        PlayerRegistry.get((sender as Player).uniqueId).thenAccept { player -> run {
-            player.sendMessage(MessageBuilder()
-                .append("<green>Player Info for <white>${player.data.name} <grey><i>(Hover)") {
-                    this.hoverText(
-                        "<dark_red><b>Name: <grey>${player.data.name}",
-                        "<dark_red><b>Unique ID: <grey>${player.data.uuid}",
-                        "<dark_red><b>Discord ID: <grey>${if (player.data.discordId == "") "Not Synced" else player.data.discordId}",
-                        "<dark_red><b>First Played: <grey>${formatDate(player.data.firstJoined)}",
-                        "<dark_red><b>Last IP: <grey>${player.data.ipHistory.last()}"
-                    )
-                }.build())
-        } }
+        val item: Item = Item(
+            Material.DIAMOND_PICKAXE,
+            name = FormatParser.parse("<from:3F5EFB><bold>Test Enchant Item</bold><to:FC466B>"),
+            lore = listOf(
+                FormatParser.parse("<from:3D58DB>| This is a test item for enchantments!<to:BD4FD6>"),
+                FormatParser.parse("<from:3D58DB>| It has a custom name and lore!<to:BD4FD6>")
+            ),
+            enchantable = true
+        )
+
+        (sender as Player).inventory.addItem(item.toItemStack())
         return Result.SUCCESS
     }
 }

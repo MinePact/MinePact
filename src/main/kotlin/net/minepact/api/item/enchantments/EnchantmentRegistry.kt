@@ -8,4 +8,5 @@ object EnchantmentRegistry {
     }
 
     fun all(): List<Enchantment> = enchants
+    fun getByName(name: String): Enchantment? = enchants.firstOrNull { it.action().info.name == name }
 }

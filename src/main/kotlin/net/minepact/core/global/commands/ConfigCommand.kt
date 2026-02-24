@@ -8,7 +8,8 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.config.ConfigurationRegistry
 import net.minepact.api.messages.send
-import org.bukkit.command.CommandSender
+import net.minepact.api.player.Player
+import net.minepact.api.player.permissions.Permission
 import kotlin.reflect.KClass
 
 class ConfigCommand : Command(
@@ -24,13 +25,13 @@ class ConfigCommand : Command(
             )
         )
     ),
-    permission = "minepact.admin.config",
+    permission = Permission("minepact.admin.config"),
     aliases = mutableListOf("cfg", "conf"),
     cooldown = 1.0,
     playerOnly = false
 ) {
     override fun execute(
-        sender: CommandSender,
+        sender: Player,
         args: MutableList<Argument<*>>
     ): Result {
         val action = args[0].value as String
@@ -38,7 +39,7 @@ class ConfigCommand : Command(
 
         val configClass = ConfigurationRegistry.configs.keys.firstOrNull { it.simpleName == configName }
         if (configClass == null) {
-            sender.send("<red>Configuration file '$configName' not found.")
+            sender.sendMessage("<red>Configuration file '$configName' not found.")
             return Result.SUCCESS
         }
         val configInstance = ConfigurationRegistry.configs[configClass]!!
@@ -66,7 +67,7 @@ class ConfigCommand : Command(
 
             "reload" -> {
                 ConfigurationRegistry.reload(clazz = configInstance.clazz)
-                sender.send("<green>Configuration file '$configName' reloaded successfully.")
+                sender.sendMessage("<green>Configuration file '$configName' reloaded successfully.")
             }
         }
         return Result.SUCCESS

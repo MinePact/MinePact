@@ -6,6 +6,7 @@ import net.minepact.api.discord.embed.Embed
 import net.minepact.api.discord.embed.Footer
 import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDuration
+import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
@@ -14,7 +15,7 @@ import java.util.Date
 
 fun kickEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Embed(
         author = Author(),
-        title = "${punishment.targetName} has been kicked",
+        title = "${PlayerRegistry.get(punishment.target).get().data.name} has been kicked",
         url = null,
         descriptionLines = listOf(
             "",
@@ -22,7 +23,7 @@ fun kickEmbed(punishment: Punishment, modifiers: List<PunishmentModifier>) = Emb
                 if (modifiers.contains(ScopeModifier.GLOBAL)) "Network"
                 else SERVER.info.name
             }",
-            "**Staff**: ${punishment.issuerName}",
+            "**Staff**: ${PlayerRegistry.get(punishment.issuer).get().data.name}",
             "**Reason**: ${punishment.reason}",
             "**Modifiers**: ${modifiers[0]}, ${modifiers[1]}"
         ),

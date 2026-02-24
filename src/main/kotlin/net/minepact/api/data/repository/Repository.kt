@@ -34,32 +34,43 @@ abstract class Repository<T> {
         val placeholders = columns.joinToString(", ") { "?" }
         val updateClause = columns.joinToString(", ") { "$it = VALUES($it)" }
 
+        Main.instance.logger.info { "[${this.javaClass.simpleName}] Inserted $columns." }
+
         val sql = """
                 INSERT INTO ${tableName()} (${columns.joinToString(", ")})
                 VALUES ($placeholders)
                 ON DUPLICATE KEY UPDATE $updateClause
         """.trimIndent()
+        println(sql)
+
         return database.update(sql, insertValues(entity))
     }
     fun insertWithoutUpdate(entity: T): CompletableFuture<Int> {
         val columns = insertColumns()
         val placeholders = columns.joinToString(", ") { "?" }
 
+        Main.instance.logger.info { "[${this.javaClass.simpleName}] Inserted $columns." }
+
         val sql = """
                 INSERT INTO ${tableName()} (${columns.joinToString(", ")})
                 VALUES ($placeholders)
         """.trimIndent()
 
+        println(sql)
+
         return database.update(sql, insertValues(entity))
     }
 
     fun deleteById(id: Any): CompletableFuture<Int> {
+        Main.instance.logger.info { "[${this.javaClass.simpleName}] Deleted by id: $id." }
+
         return database.update(
             "DELETE FROM ${tableName()} WHERE id = ?",
             listOf(id)
         )
     }
     fun deleteAll(): CompletableFuture<Int> {
+        Main.instance.logger.info { "[${this.javaClass.simpleName}] Cleared." }
         return database.update("DELETE FROM ${tableName()}", listOf())
     }
 

@@ -3,7 +3,6 @@ package net.minepact.core.global.configs
 import net.minepact.api.config.AbstractConfigurationFile
 import net.minepact.api.config.Comment
 import net.minepact.api.config.ReloadableConfig
-import net.minepact.core.global.commands.punishment.KickCommand
 
 class PunishmentConfig : AbstractConfigurationFile(), ReloadableConfig<PunishmentConfig> {
     override val fileName: String = "punishments.yml"

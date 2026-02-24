@@ -4,6 +4,7 @@ import net.minepact.Main
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.parseArgument
 import net.minepact.api.messages.send
+import net.minepact.api.player.asPlayer
 import net.minepact.api.server.ServerType
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
@@ -11,6 +12,12 @@ import org.bukkit.command.CommandMap
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
+/**
+ * A class responsible for the registration and function of all commands when ran.
+ * Handles permissions, cooldowns, argument parsing, and tab completion.
+ *
+ * @author dankenyon - 22/02/26
+ */
 class CommandRegister {
     private val COMMANDS: MutableList<Command> = mutableListOf()
     private val RAN_COMMANDS: MutableMap<CommandSender, MutableMap<Command, Long>> = mutableMapOf()
@@ -27,7 +34,7 @@ class CommandRegister {
                 label: String,
                 args: Array<String>
             ): Boolean {
-                if (!sender.hasPermission(command.permission)) {
+                if (!sender.asPlayer().hasPermission(command.permission)) {
                     sender.send("<red>You do not have permission to execute this command.")
                     return true
                 }
@@ -79,7 +86,7 @@ class CommandRegister {
                     RAN_COMMANDS[sender] = RAN_COMMANDS.getOrDefault(sender, mutableMapOf())
                         .also { it[command] = System.currentTimeMillis() }
                     if (command.log) Main.LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}")
-                    command.execute(sender, parsedArgs) == Result.SUCCESS
+                    command.execute(sender.asPlayer(), parsedArgs) == Result.SUCCESS
                 } catch (e: Exception) {
                     e.printStackTrace()
                     false

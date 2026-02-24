@@ -1,5 +1,9 @@
 package net.minepact.api.command.arguments
 
+/**
+ * Represents the type of input expected for a command argument.
+ * @author dankenyon - 22/02/26
+ */
 enum class ArgumentInputType {
     INTEGER,
     STRING,

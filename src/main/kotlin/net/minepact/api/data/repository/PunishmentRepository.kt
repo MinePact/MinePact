@@ -14,8 +14,9 @@ object PunishmentRepository : Repository<Punishment>() {
         .column("id", DataType.UUID, primaryKey = true)
         .column("servers", DataType.STRING, nullable = false)
         .column("type", DataType.STRING, nullable = false)
-        .column("target", DataType.STRING, nullable = false)
-        .column("issuer", DataType.STRING, nullable = false)
+        .column("target", DataType.UUID, nullable = false)
+        .column("target_ip", DataType.STRING, nullable = true)
+        .column("issuer", DataType.UUID, nullable = false)
         .column("reason", DataType.STRING, nullable = false)
         .column("punished_at", DataType.LONG, nullable = false)
         .column("expires_at", DataType.LONG, nullable = false)
@@ -26,25 +27,26 @@ object PunishmentRepository : Repository<Punishment>() {
         .build()
     override fun map(rs: ResultSet): Punishment = Punishment(
         id = UUID.fromString(rs.getString("id")),
-        targetServers = rs.getString("servers").split(",").filter { it.isNotEmpty() }.map { UUID.fromString(it) },
+        servers = rs.getString("servers").split(",").filter { it.isNotEmpty() }.map { UUID.fromString(it) },
         type = PunishmentType.valueOf(rs.getString("type")),
-        targetName = rs.getString("target"),
+        target = UUID.fromString(rs.getString("target")),
         targetIp = rs.getString("target_ip").takeIf { it.isNotEmpty() },
-        issuerName = rs.getString("issuer"),
+        issuer = UUID.fromString(rs.getString("issuer")),
         reason = rs.getString("reason"),
         punishedAt = rs.getLong("punished_at"),
         expiresAt = rs.getLong("expires_at"),
         reverted = rs.getBoolean("reverted"),
-        revertedBy = rs.getString("reverted_by").takeIf { it.isNotEmpty() },
+        revertedBy = UUID.fromString(rs.getString("reverted_by").takeIf { it.isNotEmpty() }),
         revertedAt = rs.getLong("reverted_at").takeIf { it != 0L },
         revertReason = rs.getString("reverted_reason").takeIf { it.isNotEmpty() }
     )
     override fun insertValues(entity: Punishment): List<Any> = listOf(
         entity.id.toString(),
-        entity.targetServers.joinToString(",") { it.toString() },
+        entity.servers.joinToString(",") { it.toString() },
         entity.type.name,
-        entity.targetName,
-        entity.issuerName,
+        entity.target.toString(),
+        entity.targetIp ?: "",
+        entity.issuer.toString(),
         entity.reason,
         entity.punishedAt,
         entity.expiresAt,
@@ -60,22 +62,22 @@ object PunishmentRepository : Repository<Punishment>() {
             listOf(id.toString()),
             ::map
         )
-    fun findByTarget(targetName: String): CompletableFuture<List<Punishment>> =
+    fun findByTarget(target: UUID): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE target = ?",
-            listOf(targetName),
+            listOf(target),
             ::map
         )
-    fun findActiveByTargetAndType(targetName: String, type: PunishmentType): CompletableFuture<Punishment?> =
+    fun findActiveByTargetAndType(target: UUID, type: PunishmentType): CompletableFuture<Punishment?> =
         database.query(
             "SELECT * FROM punishments WHERE target = ? AND type = ? AND reverted = false AND expires_at > ? ORDER BY expires_at DESC LIMIT 1",
-            listOf(targetName, type.name, System.currentTimeMillis()),
+            listOf(target, type.name, System.currentTimeMillis()),
             ::map
         ).thenApply { it.firstOrNull() }
-    fun findByIssuer(issuerName: String): CompletableFuture<List<Punishment>> =
+    fun findByIssuer(issuer: UUID): CompletableFuture<List<Punishment>> =
         database.query(
             "SELECT * FROM punishments WHERE issuer = ?",
-            listOf(issuerName),
+            listOf(issuer),
             ::map
         )
     fun findByServer(serverId: UUID): CompletableFuture<List<Punishment>> =

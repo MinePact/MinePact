@@ -21,7 +21,7 @@ object PlayerRepository : Repository<PlayerData>() {
     override fun map(rs: ResultSet): PlayerData = PlayerData(
             uuid = UUID.fromString(rs.getString("uuid")),
             name = rs.getString("name"),
-            ipHistory = rs.getString("ip_history").replace("[", "").replace("]", "").split(","),
+            ipHistory = rs.getString("ip_history").split(","),
             discordId = rs.getString("discordId"),
             nick = rs.getString("nick"),
             chatColour = rs.getInt("chat_colour"),
@@ -32,7 +32,7 @@ object PlayerRepository : Repository<PlayerData>() {
         return listOf(
             entity.uuid.toString(),
             entity.name,
-            entity.ipHistory,
+            entity.ipHistory.joinToString(","),
             entity.discordId,
             entity.nick,
             entity.chatColour,

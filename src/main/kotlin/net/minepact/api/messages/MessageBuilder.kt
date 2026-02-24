@@ -19,5 +19,20 @@ class MessageBuilder {
         return this
     }
 
+    fun replace(text: String, replacement: String): MessageBuilder {
+        for (component in components) {
+            component.text.replace(text, replacement)
+        }
+        return this
+    }
+    fun replace(vararg replacements: Pair<String, String>): MessageBuilder {
+        for (component in components) {
+            for (replacement in replacements) {
+                component.text = component.text.replace(replacement.first, replacement.second)
+            }
+        }
+        return this
+    }
+
     fun build(): Message = Message(components = components.toList())
 }

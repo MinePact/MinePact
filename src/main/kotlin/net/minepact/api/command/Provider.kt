@@ -2,12 +2,18 @@ package net.minepact.api.command
 
 import net.minepact.api.config.ConfigurationRegistry
 import net.minepact.api.punishment.modifier.AnnouncementModifier
-import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.api.server.ServerType
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 
+/**
+ * A provider is a function that takes in a CommandSender and returns a list of potential values for an argument.
+ *
+ * @see net.minepact.api.command.arguments.ExpectedArgument
+ *
+ * @author dankenyon - 22/02/26
+ */
 class Provider {
     companion object {
         val EMPTY: (CommandSender) -> List<String> = { _ -> emptyList() }

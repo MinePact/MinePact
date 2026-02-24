@@ -20,9 +20,10 @@ class VeinMinerEnchant : EnchantmentAction(
 ) {
     init {
         on<BlockBreakEvent> { event, level ->
-            PlayerRegistry.get(event.player.uniqueId).thenAccept { player -> {
-
-            } }
+            PlayerRegistry.get(event.player.uniqueId).thenAccept { player -> run {
+                    player.sendMessage("hi")
+                }
+            }
         }
     }
 }

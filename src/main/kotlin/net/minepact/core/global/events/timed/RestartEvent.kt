@@ -1,64 +1,62 @@
 package net.minepact.core.global.events.timed
 
-import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.title.Title
 import net.minepact.Main
+import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.schedular.TimeInterval
 import net.minepact.api.schedular.TimedEvent
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitTask
 
 class RestartEvent(
-    var waitPeriod: Long = TimeInterval.MINUTE * 30
+    var waitPeriod: Long = TimeInterval.MINUTE * 30 // default
 ) : TimedEvent(
-    startTime = "20:00:00",
+    startTime = "18:00:00",
     interval = TimeInterval.DAY,
     cancelled = false
 ) {
+    private var task: BukkitTask? = null
+    private var remainingTime: Long = waitPeriod
+
     override fun run() {
-        while (true) {
-            if (cancelled) break
+        if (cancelled) return
 
-            if (waitPeriod > TimeInterval.HOUR) {
-                waitPeriod = TimeInterval.HOUR
+        remainingTime = waitPeriod.coerceAtMost(TimeInterval.HOUR)
+
+        task = Bukkit.getScheduler().runTaskTimer(Main.instance, Runnable {
+            if (cancelled) {
+                task?.cancel()
+                return@Runnable
             }
 
-            if (waitPeriod <= TimeInterval.SECOND * 10) {
-                if (waitPeriod == 0L) {
-                    Thread.sleep(TimeInterval.SECOND / 2)
-                    Main.RESTARTING = true
-                    Bukkit.getServer().restart()
-                    break
-                }
-                Bukkit.getOnlinePlayers().forEach { player -> title(waitPeriod, player) }
-                waitPeriod -= TimeInterval.SECOND
-                Thread.sleep(TimeInterval.SECOND)
-                continue
+            if (shouldShowTitle(remainingTime)) {
+                PlayerRegistry.online().forEach { it.title("<green>Restarting in: <red><b>${TimeInterval.format(remainingTime)}</b>") }
             }
 
-            if ((waitPeriod * 10) % (30 * TimeInterval.SECOND) == 0L) {
-                Bukkit.getOnlinePlayers().forEach { player -> title(waitPeriod, player) }
-            }
+            remainingTime -= TimeInterval.SECOND
 
-            waitPeriod -= TimeInterval.SECOND
-            Thread.sleep(TimeInterval.SECOND)
-        }
+            if (remainingTime <= 0) {
+                task?.cancel()
+                Main.RESTARTING = true
+                Bukkit.getServer().restart()
+            }
+        }, 0L, TimeInterval.SECOND / 50)
     }
     override fun cancel() {
         super.cancel()
+        task?.cancel()
 
-        Bukkit.getOnlinePlayers().forEach { player -> run { player.showTitle(Title.title(
-            MiniMessage.miniMessage().deserialize("<red><b>Restart cancelled!</b>"),
-            MiniMessage.miniMessage().deserialize("")
-        )) } }
+        PlayerRegistry.online().forEach { it.title("<red><b>Restart cancelled!</b>") }
     }
 
-    fun title(time: Long, player: Player) {
-        val timeLeft: String = TimeInterval.format(time)
-
-        player.showTitle(Title.title(
-            MiniMessage.miniMessage().deserialize("<green>Restarting in: <red><b>${timeLeft}</b>"),
-            MiniMessage.miniMessage().deserialize("")
-        ))
+    private fun shouldShowTitle(time: Long): Boolean {
+        return when {
+            time >= TimeInterval.HOUR -> time == TimeInterval.HOUR
+            time >= TimeInterval.MINUTE * 30 -> time % (TimeInterval.MINUTE * 30) == 0L
+            time >= TimeInterval.MINUTE * 15 -> time % (TimeInterval.MINUTE * 15) == 0L
+            time >= TimeInterval.MINUTE * 5 -> time % (TimeInterval.MINUTE * 5) == 0L
+            time >= TimeInterval.MINUTE -> time % TimeInterval.MINUTE == 0L
+            time <= TimeInterval.SECOND * 5 -> true // last 5 seconds
+            else -> false
+        }
     }
 }

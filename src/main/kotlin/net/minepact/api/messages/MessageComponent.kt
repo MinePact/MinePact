@@ -6,7 +6,7 @@ import net.minepact.api.messages.actions.ClickAction
 import net.minepact.api.messages.actions.HoverAction
 
 data class MessageComponent(
-    val text: String,
+    var text: String,
     val color: Int? = null,
     val bold: Boolean = false,
     val italic: Boolean = false,

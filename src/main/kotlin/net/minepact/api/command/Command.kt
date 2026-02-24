@@ -1,15 +1,32 @@
 package net.minepact.api.command
 
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.messages.formatString
+import net.minepact.api.messages.helper.formatString
+import net.minepact.api.player.Player
+import net.minepact.api.player.permissions.Permission
 import net.minepact.api.server.ServerType
-import org.bukkit.command.CommandSender
 
+/**
+ * The base command which gives the structure for every command.
+ *
+ * @property server The server which the command will be used on. Default [ServerType.GLOBAL].
+ * @property name The name of the command, which is used in the label.
+ * @property description A brief description of the command, which is used in /help.
+ * @property permission The permission node required to execute the command.
+ * @property usage How the command is used which is used in /help and errors. [CommandUsage]
+ * @property aliases Alternative labels for the command.
+ * @property cooldown The cooldown of the command in seconds. Default -1.
+ * @property playerOnly Whether the command can only be executed by players. Default false.
+ * @property maxArgs The maximum amount of args the command can take. Default [Int.MAX_VALUE].
+ * @property log Whether the command execution should be logged. Default false.
+ *
+ * @author dankenyon - 22/02/26
+ */
 abstract class Command(
     val server: ServerType = ServerType.GLOBAL,
     val name: String,
     val description: String,
-    val permission: String,
+    val permission: Permission,
     var usage: CommandUsage,
     var aliases: MutableList<String> = mutableListOf(),
     var cooldown: Double = -1.0,
@@ -17,15 +34,19 @@ abstract class Command(
     val maxArgs: Int = Int.MAX_VALUE,
     val log: Boolean = false,
 ) {
+    @Deprecated("")
     protected val subCommands: MutableMap<String, SubCommand> = mutableMapOf()
 
+    @Deprecated("")
     fun getSubCommand(name: String?): SubCommand? = subCommands[name?.lowercase()]
+    @Deprecated("")
     fun allSubCommands(): Collection<SubCommand> = subCommands.values
+    @Deprecated("")
     fun registerSubCommand(sub: SubCommand) {
         subCommands[sub.name.lowercase()] = sub
     }
 
-    abstract fun execute(sender: CommandSender, args: MutableList<Argument<*>>): Result
+    abstract fun execute(sender: Player, args: MutableList<Argument<*>>): Result
 
     override fun toString(): String = formatString(
         "Command[",

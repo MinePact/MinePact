@@ -11,7 +11,7 @@ import net.minepact.api.player.PlayerData
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
-import net.minepact.core.global.commands.punishment.helper.message.getPunishmentMessage
+import net.minepact.core.global.commands.staff.punishment.helper.message.getPunishmentMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.event.player.PlayerJoinEvent
@@ -57,12 +57,12 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
 
         PlayerRegistry.get(uuid).thenAccept { it.online = true }
 
-        PunishmentRepository.findByTarget(player.name).thenAccept { punishments ->
+        PunishmentRepository.findByTarget(player.uniqueId).thenAccept { punishments ->
             val activeBan = punishments.firstOrNull { punishment ->
                 punishment.type == PunishmentType.BAN &&
                         !punishment.reverted &&
                         System.currentTimeMillis() < punishment.expiresAt &&
-                        punishment.targetServers.contains(Main.SERVER.info.uuid)
+                        punishment.servers.contains(Main.SERVER.info.uuid)
             }
 
             if (activeBan != null) {

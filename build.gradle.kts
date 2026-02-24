@@ -15,21 +15,25 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
+
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("net.luckperms:api:5.5")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.3.10")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
-    // JSON support for menu serialization
     implementation("com.google.code.gson:gson:2.10.1")
 }
 
 tasks {
-  runServer {
-    minecraftVersion("1.21")
-  }
+    runServer {
+        minecraftVersion("1.21")
+    }
 
     shadowJar {
+        archiveClassifier.set("")
         destinationDirectory = file("C:\\Users\\danhk\\Desktop\\servers\\mp\\plugins")
     }
 }

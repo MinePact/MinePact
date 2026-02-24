@@ -7,15 +7,16 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
+import net.minepact.api.player.Player
+import net.minepact.api.player.permissions.Permission
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
-import org.bukkit.command.CommandSender
 
 class CreativeCommand : Command(
     name = "creative",
     aliases = mutableListOf("gmc", "gmcreative", "gamemodecreative"),
     description = "Creates a player's game as a game for creative.",
-    permission = "",
+    permission = Permission("minepact.gamemode.creative"),
     playerOnly = true,
     usage = CommandUsage(
         label = "creative", arguments = listOf(
@@ -24,16 +25,22 @@ class CreativeCommand : Command(
     ),
 ) {
     override fun execute(
-        sender: CommandSender,
+        sender: Player,
         args: MutableList<Argument<*>>
     ): Result {
         try {
-            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.name
+            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.data.name
             val target = Bukkit.getPlayerExact(targetName)!!
             target.gameMode = GameMode.CREATIVE
+
+            if (sender.asPlayer() == target) sender.sendMessage("<green>You are now in <yellow>creative <green>mode.")
+            else {
+                sender.sendMessage("<green>${target.name} is now in <yellow>creative <green>mode.")
+                target.sendMessage("<green>You are now in <yellow>creative <green>mode.")
+            }
             return Result.SUCCESS
         }catch (e: NullPointerException) {
-            sender.send("<red>Player not found.")
+            sender.sendMessage("<red>Player not found.")
             return Result.FAILURE
         }
     }
