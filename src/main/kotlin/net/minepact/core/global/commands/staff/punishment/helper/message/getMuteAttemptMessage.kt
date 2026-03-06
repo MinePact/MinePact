@@ -1,9 +1,8 @@
 package net.minepact.core.global.commands.staff.punishment.helper.message
 
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.misc.formatDate
 import net.minepact.api.misc.formatDuration
-import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.Punishment
 import net.minepact.core.global.configs.PunishmentConfig

@@ -1,7 +1,7 @@
 package net.minepact.api.server
 
 import net.minepact.Main
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.data.repository.ServerRepository
 import net.minepact.core.global.configs.ServerConfig
 import org.bukkit.Bukkit

@@ -40,7 +40,7 @@ class SyncCommand : Command(
         sender.sendMessage("<green>In <yellow>/discord<green>, type <yellow>/sync $code <green>to sync your accounts.")
         sender.sendMessage("")
 
-        SyncCodeRepository.insertWithoutUpdate(SyncData((sender as Player).uniqueId, code))
+        SyncCodeRepository.insertWithoutUpdate(SyncData(sender.data.uuid, code))
 
         return Result.SUCCESS
     }

@@ -1,4 +1,4 @@
-package net.minepact.api.config
+package net.minepact.api.config.experimental
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass

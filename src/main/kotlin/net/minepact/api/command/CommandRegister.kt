@@ -124,6 +124,20 @@ class CommandRegister {
             Main.instance.logger.info("[CommandRegister] Registered ${command.javaClass.name}!")
         }
     }
+    fun unregister(command: Command) {
+        this.getCommandMap().knownCommands.remove("${Main.instance.name.lowercase()}:${command.name}")
+        this.getCommandMap().knownCommands.remove(command.name)
+
+        COMMANDS.remove(command)
+        Main.instance.logger.info("[CommandRegister] Unregistered ${command.javaClass.name}!")
+    }
+    fun unregister(name: String) {
+        this.getCommandMap().knownCommands.remove("${Main.instance.name.lowercase()}:${name}")
+        this.getCommandMap().knownCommands.remove(name)
+
+        Main.instance.logger.info("[CommandRegister] Unregistered ${COMMANDS.first { it.name == name }.javaClass.name}!")
+        COMMANDS.forEach { if (it.name == name) COMMANDS.remove(it) }
+    }
 
     fun all(): List<Command> = COMMANDS
     fun allNames(): List<String> = COMMANDS.map { it.name }

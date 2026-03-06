@@ -1,4 +1,4 @@
-package net.minepact.api.config
+package net.minepact.api.config.experimental
 
 import net.minepact.Main
 import org.bukkit.configuration.file.YamlConfiguration

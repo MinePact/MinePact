@@ -1,8 +1,8 @@
 package net.minepact.api.reflections
 
 import net.minepact.Main
-import net.minepact.api.config.ConfigurationFile
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationFile
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import java.io.File
 import java.lang.reflect.Modifier
 import java.util.jar.JarFile

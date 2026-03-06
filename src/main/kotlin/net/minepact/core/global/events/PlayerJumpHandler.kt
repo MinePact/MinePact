@@ -1,7 +1,7 @@
 package net.minepact.core.global.events
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.core.global.configs.PluginConfig
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler

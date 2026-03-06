@@ -1,6 +1,6 @@
 package net.minepact.api.command
 
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.api.server.ServerType

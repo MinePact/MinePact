@@ -6,8 +6,7 @@ import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.config.ConfigurationRegistry
-import net.minepact.api.messages.send
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.player.Player
 import net.minepact.api.player.permissions.Permission
 import kotlin.reflect.KClass

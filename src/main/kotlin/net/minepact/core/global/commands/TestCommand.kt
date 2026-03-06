@@ -36,7 +36,7 @@ class TestCommand : Command(
             enchantable = true
         )
 
-        (sender as Player).inventory.addItem(item.toItemStack())
+        sender.asPlayer()!!.inventory.addItem(item.toItemStack())
         return Result.SUCCESS
     }
 }

@@ -1,10 +1,9 @@
 package net.minepact.core.global.configs
 
-import net.minepact.api.config.AbstractConfigurationFile
-import net.minepact.api.config.Comment
-import net.minepact.api.config.ReloadableConfig
+import net.minepact.api.config.experimental.AbstractConfigurationFile
+import net.minepact.api.config.experimental.Comment
+import net.minepact.api.config.experimental.ReloadableConfig
 import net.minepact.api.punishment.modifier.AnnouncementModifier
-import net.minepact.api.punishment.modifier.PunishmentModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 
 class PluginConfig : AbstractConfigurationFile(), ReloadableConfig<PluginConfig> {

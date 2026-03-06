@@ -1,9 +1,13 @@
 package net.minepact
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import net.luckperms.api.LuckPerms
-
 import net.minepact.api.command.CommandRegister
-import net.minepact.api.config.ConfigurationRegistry
+import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.data.Database
 import net.minepact.api.data.DatabaseConfig
 import net.minepact.api.data.DatabaseFactory
@@ -21,6 +25,7 @@ import net.minepact.api.reflections.findEvents
 import net.minepact.api.reflections.findRepositories
 import net.minepact.api.reflections.registerConfigs
 import net.minepact.api.schedular.EventScheduler
+import net.minepact.api.scripts.ScriptManager
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.restartEmbed
 import net.minepact.core.discord.embeds.startEmbed
@@ -31,10 +36,10 @@ import net.minepact.core.global.enchantments.PickaxeEnchantment
 import net.minepact.core.global.events.timed.MotdEvent
 import net.minepact.core.global.events.timed.RestartEvent
 import org.bukkit.Bukkit
+import java.util.concurrent.Executor
 import kotlin.properties.Delegates
 
-
-class Main : org.bukkit.plugin.java.JavaPlugin() {
+class Main : org.bukkit.plugin.java.JavaPlugin(), CoroutineScope {
     companion object {
         lateinit var instance: Main
         lateinit var COMMAND_REGISTRY: CommandRegister
@@ -48,6 +53,8 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         lateinit var UPDATES_WEBHOOK: Webhook
         lateinit var LOGGING_WEBHOOK: Webhook
         lateinit var PUNISHMENTS_WEBHOOK: Webhook
+
+        lateinit var SCRIPT_MANAGER: ScriptManager
 
         lateinit var LUCKPERMS_API: LuckPerms
 
@@ -99,11 +106,13 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
             EnchantmentRegistry.register(e)
         }
 
+        SCRIPT_MANAGER = ScriptManager()
+        async { SCRIPT_MANAGER.loadAll() }
+
         UPDATES_WEBHOOK.sendMessage("", listOf(startEmbed()))
 
         instance.logger.info("")
     }
-
     override fun onEnable() {
         val pluginManager = Bukkit.getPluginManager()
         pluginManager.plugins.forEach { println(it.name)}
@@ -126,9 +135,14 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         MenuManager.initialize()
     }
-
     override fun onDisable() {
         if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))
         else UPDATES_WEBHOOK.sendMessage("", listOf(stopEmbed()))
     }
+
+    private val supervisorJob = SupervisorJob()
+    override val coroutineContext = supervisorJob + Dispatchers.Default
+
+    val mainThreadExecutor: Executor = Executor { task -> server.scheduler.runTask(this, task) }
+    fun <T> async(block: suspend CoroutineScope.() -> T): Deferred<T> = async(coroutineContext, block = block)
 }
