@@ -77,16 +77,16 @@ class ScriptCommand : Command(
     }
 
     private fun updateUsage(args: MutableList<Argument<*>>) {
-        if ((args[0].value as String) == "reload") usage = CommandUsage(label = "script", arguments = listOf(
-                    ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info")),
-                    ExpectedArgument(name = "option", potentialValues = listOf("--hard"))
-            ))
-        else if ((args[0].value as String) == "info") usage = CommandUsage(label = "script", arguments = listOf(
-                    ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info")),
-                    ExpectedArgument(name = "option", Main.SCRIPT_MANAGER.loadedScripts().filter { it.startsWith(args[1].value as String) }.toList())
-            ))
-        else usage = CommandUsage(label = "script", arguments = listOf(
-                    ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info"))
-            ))
+        this.usage = if ((args[0].value as String) == "reload") CommandUsage(label = "script", arguments = listOf(
+            ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info")),
+            ExpectedArgument(name = "option", potentialValues = listOf("--hard"))
+        ))
+        else if ((args[0].value as String) == "info") CommandUsage(label = "script", arguments = listOf(
+            ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info")),
+            ExpectedArgument(name = "option", Main.SCRIPT_MANAGER.loadedScripts().filter { it.startsWith(args[1].value as String) }.toList())
+        ))
+        else CommandUsage(label = "script", arguments = listOf(
+            ExpectedArgument(name = "action", potentialValues = listOf("reload", "list", "info"))
+        ))
     }
 }

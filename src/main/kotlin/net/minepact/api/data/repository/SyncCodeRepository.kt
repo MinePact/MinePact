@@ -8,7 +8,7 @@ import java.sql.ResultSet
 import java.util.UUID
 
 object SyncCodeRepository : Repository<SyncData>() {
-    override fun table(): DatabaseTable  = TableBuilder("sync_codes")
+    override fun table(): DatabaseTable = TableBuilder("sync_codes")
         .column("uuid", DataType.UUID, primaryKey = true)
         .column("code", DataType.STRING, nullable = false)
         .build()

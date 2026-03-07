@@ -26,17 +26,9 @@ class TestCommand : Command(
         sender: net.minepact.api.player.Player,
         args: MutableList<Argument<*>>
     ): Result {
-        val item: Item = Item(
-            Material.DIAMOND_PICKAXE,
-            name = FormatParser.parse("<from:3F5EFB><bold>Test Enchant Item</bold><to:FC466B>"),
-            lore = listOf(
-                FormatParser.parse("<from:3D58DB>| This is a test item for enchantments!<to:BD4FD6>"),
-                FormatParser.parse("<from:3D58DB>| It has a custom name and lore!<to:BD4FD6>")
-            ),
-            enchantable = true
-        )
 
-        sender.asPlayer()!!.inventory.addItem(item.toItemStack())
+
+
         return Result.SUCCESS
     }
 }

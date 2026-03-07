@@ -1,6 +1,7 @@
 package net.minepact.api.player
 
 import net.minepact.api.data.repository.PlayerRepository
+import net.minepact.api.world.Position
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
@@ -16,7 +17,7 @@ object PlayerRegistry {
 
         return PlayerRepository.findByUUID(uuid).thenApply { data ->
             if (data == null) return@thenApply null
-            val player = Player(data, online = false)
+            val player = Player(data, online = false, pos = Position.spawn())
             register(player)
             player
         }
@@ -30,7 +31,7 @@ object PlayerRegistry {
         }
         return PlayerRepository.findByName(lower).thenApply { data ->
             if (data == null) return@thenApply null
-            val player = Player(data, online = false)
+            val player = Player(data, online = false, pos = Position.spawn())
             register(player)
             player
         }

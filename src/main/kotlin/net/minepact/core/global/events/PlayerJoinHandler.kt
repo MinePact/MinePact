@@ -6,11 +6,14 @@ import net.minepact.api.data.repository.PlayerRepository
 import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
+import net.minepact.api.math.Vector
+import net.minepact.api.math.helper.vector.vec
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerData
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
+import net.minepact.api.world.Position
 import net.minepact.core.global.commands.staff.punishment.helper.message.getPunishmentMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -52,7 +55,12 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         }
 
         if (!PlayerRegistry.playersByUUID.containsKey(uuid)) {
-            PlayerRegistry.register(Player(data, true))
+            PlayerRegistry.register(Player(data, true, Position(
+                vector = vec(player.x, player.y, player.z),
+                yaw = player.yaw,
+                pitch = player.pitch,
+                world = player.world.name
+            )))
         }
 
         PlayerRegistry.get(uuid).thenAccept { it.online = true }

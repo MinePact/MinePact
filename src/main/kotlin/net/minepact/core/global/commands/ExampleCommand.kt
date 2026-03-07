@@ -15,8 +15,8 @@ class Command : Command(
     aliases = mutableListOf(""),
     permission = Permission(""),
     usage = CommandUsage(label = "", arguments = emptyList()),
-    cooldown = 0.0,
-    log = false,
+    cooldown = 0.0, // seconds
+    log = false, // sent to discord via webhook
     maxArgs = 1
 ) {
     override fun execute(

@@ -7,7 +7,7 @@ import kotlin.script.experimental.annotations.KotlinScript
     displayName = "MinePact Bootstrap",
     fileExtension = "bootstrap.minepact.kts",
     compilationConfiguration = BootstrapCompilationConfig::class,
-    evaluationConfiguration  = BootstrapEvalConfig::class
+    evaluationConfiguration = BootstrapEvalConfig::class
 )
 abstract class BootstrapScript(val bootstrap: BootstrapDSL) {
     fun loadOrder(vararg names: String) = bootstrap.loadOrder(*names)

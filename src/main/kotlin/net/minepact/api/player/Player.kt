@@ -6,11 +6,13 @@ import net.kyori.adventure.title.Title
 import net.luckperms.api.node.types.InheritanceNode
 import net.luckperms.api.node.types.PermissionNode
 import net.minepact.Main
+import net.minepact.api.math.helper.vector.vec
 import net.minepact.api.messages.FormatParser
 import net.minepact.api.messages.Message
 import net.minepact.api.player.permissions.Group
 import net.minepact.api.player.permissions.Permissable
 import net.minepact.api.player.permissions.Permission
+import net.minepact.api.world.Position
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
@@ -20,7 +22,8 @@ import java.util.*
 
 class Player(
     val data: PlayerData,
-    var online: Boolean
+    var online: Boolean,
+    var pos: Position
 ) : Permissable {
     companion object {
         val CONSOLE: Player = Player(
@@ -32,9 +35,17 @@ class Player(
                 firstJoined = 0L,
                 lastSeen = 0L
             ),
-            online = true
+            online = true,
+            pos = Position(
+                vector = vec(0, 0, 0),
+                yaw = 0f,
+                pitch = 0f,
+                world = "world"
+            )
         )
     }
+
+    /* ------------------------------------- CASTING ------------------------------------- */
 
     fun asCommandSender(): CommandSender {
         if (console()) return Bukkit.getConsoleSender()
@@ -53,6 +64,8 @@ class Player(
         if (p != null && p.isOnline) return p
         return null
     }
+
+    /* ------------------------------------- MESSAGES ------------------------------------- */
 
     fun sendMessage(message: Message) {
         if (!online) return
@@ -116,14 +129,19 @@ class Player(
 
     fun console(): Boolean = data.uuid == CONSOLE.data.uuid
 
-    override fun toString(): String {
-        return """
-            Player[
-                data=$data, 
-                online=$online
-            ]
-        """.trimMargin()
+    /* ------------------------------------- POSITION ------------------------------------- */
+
+    fun teleport(position: Position) {
+        if (!online || console()) return
+
+        val player = Bukkit.getPlayer(data.uuid)
+        if (player != null && player.isOnline) {
+            player.teleport(pos.asBukkitLocation())
+            pos = position
+        } else Main.instance.logger.info("[Teleport] Could not teleport ${data.name} to ${position.vector} in world ${position.world}")
     }
+
+    /* ------------------------------------- PERMISSIONS ------------------------------------- */
 
     override fun getPermissions(): Set<Permission> {
         val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
@@ -234,5 +252,25 @@ class Player(
 
         user.data().remove(node)
         Main.LUCKPERMS_API.userManager.saveUser(user)
+    }
+
+    /* ------------------------------------- HELPER ------------------------------------- */
+
+    override fun toString(): String {
+        return """
+            Player[
+                data=$data, 
+                online=$online
+            ]
+        """.trimMargin()
+    }
+    override fun equals(other: Any?): Boolean {
+        return other is Player && data.uuid == other.data.uuid
+    }
+    override fun hashCode(): Int {
+        var result = online.hashCode()
+        result = 31 * result + data.hashCode()
+        result = 31 * result + pos.hashCode()
+        return result
     }
 }

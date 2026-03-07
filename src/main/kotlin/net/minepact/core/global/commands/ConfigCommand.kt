@@ -6,6 +6,11 @@ import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
+import net.minepact.api.config.custom.ConfigManager
+import net.minepact.api.config.custom.ConfigType
+import net.minepact.api.config.custom.helper.MinePactConfigType
+import net.minepact.api.config.custom.helper.get
+import net.minepact.api.config.custom.minepact.MinePactFile
 import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.player.Player
 import net.minepact.api.player.permissions.Permission
@@ -17,11 +22,7 @@ class ConfigCommand : Command(
     usage = CommandUsage(
         label = "config",
         arguments = listOf(
-            ExpectedArgument(name = "action", dynamicProvider = Provider.CONFIG_ACTIONS),
-            ExpectedArgument(
-                name = "config",
-                potentialValues = ConfigurationRegistry.configs.keys.map<KClass<*>, String> { it.simpleName!! },
-            )
+
         )
     ),
     permission = Permission("minepact.admin.config"),
@@ -33,42 +34,14 @@ class ConfigCommand : Command(
         sender: Player,
         args: MutableList<Argument<*>>
     ): Result {
-        val action = args[0].value as String
-        val configName = args[1].value as String
+        val file: MinePactFile = ConfigManager.file<MinePactConfigType>("example.mpc")
 
-        val configClass = ConfigurationRegistry.configs.keys.firstOrNull { it.simpleName == configName }
-        if (configClass == null) {
-            sender.sendMessage("<red>Configuration file '$configName' not found.")
-            return Result.SUCCESS
-        }
-        val configInstance = ConfigurationRegistry.configs[configClass]!!
+        val a = file.reader.get<String>("database.username")
+        val b = file.reader.get<Int>("database.port")
 
-        when (action.lowercase()) {
-            "get" -> {
-                super.usage = CommandUsage(
-                    label = usage.label,
-                    arguments = listOf(
-                        ExpectedArgument(name = "action", dynamicProvider = Provider.CONFIG_ACTIONS),
-                        ExpectedArgument(
-                            name = "config",
-                            potentialValues = ConfigurationRegistry.configs.keys.map<KClass<*>, String> { it.simpleName!! },
-                        ),
-                        ExpectedArgument(name = "value", dynamicProvider = Provider.EMPTY)
-                    )
-                )
+        sender.sendMessage(a)
+        sender.sendMessage("$b")
 
-
-            }
-
-            "set" -> {
-                // TODO
-            }
-
-            "reload" -> {
-                ConfigurationRegistry.reload(clazz = configInstance.clazz)
-                sender.sendMessage("<green>Configuration file '$configName' reloaded successfully.")
-            }
-        }
         return Result.SUCCESS
     }
 }

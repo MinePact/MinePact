@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 
 class ScriptManager(
     private val plugin: Main = Main.instance,
-    scriptsDir: File  = File(plugin.dataFolder, "scripts"),
+    scriptsDir: File = File(plugin.dataFolder, "scripts"),
     cacheDir: File = File(plugin.dataFolder, ".script-cache")
 ) {
     private val logger: Logger = plugin.logger
@@ -54,7 +54,7 @@ class ScriptManager(
         var ok = 0; var fail = 0
         for (name in loadOrder) {
             val file = byName[name] ?: continue
-            val api  = ScriptAPI(plugin, plugin.server, registry, name, listenerRegistry)
+            val api = ScriptAPI(plugin, plugin.server, registry, name, listenerRegistry)
             loader.load(file, api)
                 .onSuccess { instance ->
                     instances[name] = instance
@@ -110,7 +110,7 @@ class ScriptManager(
             }
         }
 
-        val finalNames  = listed.filter { it in allNames }
+        val finalNames = listed.filter { it in allNames }
         val finalDepMap = finalNames.associateWith { depMap[it] ?: emptySet() }
         return resolver.resolve(finalDepMap)
     }

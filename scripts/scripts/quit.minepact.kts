@@ -13,3 +13,6 @@ command(
     sender.asPlayer()!!.kick(MiniMessage.miniMessage().deserialize("<red>You have been kicked a second time!"))
     net.minepact.api.command.Result.SUCCESS
 }
+
+
+
