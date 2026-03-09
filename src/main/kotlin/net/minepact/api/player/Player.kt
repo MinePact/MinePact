@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import net.luckperms.api.node.types.InheritanceNode
 import net.luckperms.api.node.types.PermissionNode
+import net.minecraft.server.level.ServerPlayer
 import net.minepact.Main
 import net.minepact.api.math.helper.vector.vec
 import net.minepact.api.messages.FormatParser
@@ -12,18 +13,22 @@ import net.minepact.api.messages.Message
 import net.minepact.api.player.permissions.Group
 import net.minepact.api.player.permissions.Permissable
 import net.minepact.api.player.permissions.Permission
+import net.minepact.api.server.Server
 import net.minepact.api.world.Position
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
+import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.jetbrains.kotlin.it.unimi.dsi.fastutil.objects.aS
 import org.bukkit.entity.Player as BukkitPlayer
 import java.time.Duration
 import java.util.*
 
 class Player(
     val data: PlayerData,
+    var pos: Position,
     var online: Boolean,
-    var pos: Position
+    var vanished: Boolean
 ) : Permissable {
     companion object {
         val CONSOLE: Player = Player(
@@ -35,13 +40,14 @@ class Player(
                 firstJoined = 0L,
                 lastSeen = 0L
             ),
-            online = true,
             pos = Position(
                 vector = vec(0, 0, 0),
                 yaw = 0f,
                 pitch = 0f,
                 world = "world"
-            )
+            ),
+            online = true,
+            vanished = false
         )
     }
 
@@ -63,6 +69,12 @@ class Player(
         val p: BukkitPlayer? = Bukkit.getPlayer(data.uuid)
         if (p != null && p.isOnline) return p
         return null
+    }
+    fun asCraftPlayer(): CraftPlayer {
+        return (asPlayer() as CraftPlayer)
+    }
+    fun asNMSPlayer(): ServerPlayer {
+        return asCraftPlayer().handle
     }
 
     /* ------------------------------------- MESSAGES ------------------------------------- */
@@ -139,6 +151,28 @@ class Player(
             player.teleport(pos.asBukkitLocation())
             pos = position
         } else Main.instance.logger.info("[Teleport] Could not teleport ${data.name} to ${position.vector} in world ${position.world}")
+    }
+
+    /* ------------------------------------- STAFF ------------------------------------- */
+
+    fun toggleVanish() {
+        if (!online) return
+
+        vanished = !vanished
+    }
+    fun toggleStaffMode() {
+
+    }
+
+    fun hidePlayer(target: Player) {
+        if (!online) return
+
+        val player = Bukkit.getPlayer(data.uuid)
+        val targetPlayer = Bukkit.getPlayer(target.data.uuid)
+
+        if (player != null && player.isOnline && targetPlayer != null && targetPlayer.isOnline) {
+            player.hidePlayer(Main.instance, targetPlayer)
+        } else Main.instance.logger.info("[Vanish] Could not hide ${target.data.name} from ${data.name}")
     }
 
     /* ------------------------------------- PERMISSIONS ------------------------------------- */

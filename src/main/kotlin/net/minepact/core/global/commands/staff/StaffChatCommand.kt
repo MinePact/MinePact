@@ -40,7 +40,7 @@ class StaffChatCommand : Command(
             .append($$"<white><bold>${PLAYER_NAME}</bold>:</white>").append(" ")
             .append($$"<white>${MESSAGE_CONTENTS}</white>").append(" ")
             .append(
-                    "<click:copy:${contents}><hover:Click to copy message>" +
+                    "<click:copy:${contents}><hover:'<red>Click to copy!'>" +
                     "<gray>[Copy]</gray>" +
                     "</hover></click>"
             )

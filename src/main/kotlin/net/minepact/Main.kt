@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import net.luckperms.api.LuckPerms
+
 import net.minepact.api.command.CommandRegister
 import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.data.Database
@@ -135,6 +136,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin(), CoroutineScope {
 
         MenuManager.initialize()
     }
+
     override fun onDisable() {
         if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))
         else UPDATES_WEBHOOK.sendMessage("", listOf(stopEmbed()))

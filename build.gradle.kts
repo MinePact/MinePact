@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.0"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     id("com.gradleup.shadow") version "8.3.0"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
@@ -17,6 +18,8 @@ repositories {
 }
 
 dependencies {
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.5")
 

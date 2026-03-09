@@ -11,13 +11,19 @@ object PlayerRegistry {
 
     fun all(): List<Player> = playersByUUID.values.toList()
     fun online(): List<Player> = playersByUUID.values.filter { it.online }
+    fun vanished(): List<Player> = online().filter { it.vanished }
 
     fun get(uuid: UUID): CompletableFuture<Player> {
         playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
 
         return PlayerRepository.findByUUID(uuid).thenApply { data ->
             if (data == null) return@thenApply null
-            val player = Player(data, online = false, pos = Position.spawn())
+            val player = Player(
+                data,
+                pos = Position.spawn(),
+                online = false,
+                vanished = false
+            )
             register(player)
             player
         }
@@ -31,7 +37,12 @@ object PlayerRegistry {
         }
         return PlayerRepository.findByName(lower).thenApply { data ->
             if (data == null) return@thenApply null
-            val player = Player(data, online = false, pos = Position.spawn())
+            val player = Player(
+                data,
+                pos = Position.spawn(),
+                online = false,
+                vanished = false
+            )
             register(player)
             player
         }
