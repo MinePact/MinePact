@@ -8,7 +8,7 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.scripts.ScriptManager
 import net.minepact.api.server.ServerType
 import java.util.concurrent.CompletableFuture

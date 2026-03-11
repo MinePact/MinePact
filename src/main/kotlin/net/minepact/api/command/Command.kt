@@ -3,7 +3,7 @@ package net.minepact.api.command
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.messages.helper.formatString
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerType
 
 /**

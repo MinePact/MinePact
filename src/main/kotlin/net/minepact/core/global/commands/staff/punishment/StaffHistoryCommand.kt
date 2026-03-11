@@ -13,7 +13,7 @@ import net.minepact.api.misc.formatDateShort
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentType
 

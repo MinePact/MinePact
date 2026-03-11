@@ -14,8 +14,7 @@ import net.minepact.api.messages.send
 import net.minepact.api.misc.formatDate
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.player.asPlayer
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier

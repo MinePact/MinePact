@@ -2,19 +2,14 @@ package net.minepact.core.global.commands
 
 import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
-import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.config.custom.ConfigManager
-import net.minepact.api.config.custom.ConfigType
 import net.minepact.api.config.custom.helper.MinePactConfigType
 import net.minepact.api.config.custom.helper.get
-import net.minepact.api.config.custom.minepact.MinePactFile
-import net.minepact.api.config.experimental.ConfigurationRegistry
+import net.minepact.api.config.custom.type.minepact.MinePactFile
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
-import kotlin.reflect.KClass
+import net.minepact.api.permissions.Permission
 
 class ConfigCommand : Command(
     name = "config",

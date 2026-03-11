@@ -2,7 +2,7 @@ package net.minepact.api.config.custom
 
 import net.minepact.Main
 import net.minepact.api.config.custom.exception.ConfigException
-import net.minepact.api.config.custom.minepact.MinePactFile
+import net.minepact.api.config.custom.type.minepact.MinePactFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 

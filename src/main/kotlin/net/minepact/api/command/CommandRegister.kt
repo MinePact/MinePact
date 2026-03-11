@@ -34,7 +34,7 @@ class CommandRegister {
                 label: String,
                 args: Array<String>
             ): Boolean {
-                if (!sender.asPlayer().hasPermission(command.permission)) {
+                if (!sender.asPlayer().hasPermission(command.permission) && !sender.hasPermission("minepact.command.bypass") && !sender.isOp) {
                     sender.send("<red>You do not have permission to execute this command.")
                     return true
                 }

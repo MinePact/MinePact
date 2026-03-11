@@ -8,6 +8,7 @@ import net.minepact.api.messages.FormatParser
 import net.minepact.api.messages.MessageBuilder
 import net.minepact.api.messages.send
 import net.minepact.api.player.PlayerRegistry
+import net.minepact.api.player.asPlayer
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.core.global.commands.staff.punishment.helper.message.getMuteAttemptMessage
 import org.bukkit.event.player.PlayerChatEvent
@@ -34,7 +35,10 @@ class PlayerChatHandler : SimpleEventHandler<PlayerChatEvent>() {
         event.isCancelled = true
         PlayerRegistry.online().forEach { it.sendMessage(
             MessageBuilder()
-                .append("${player.name}: ").append(message)
+                .append(if (it.getPrimaryGroup() != null) "${it.getPrimaryGroup()?.prefix} " else "")
+                .append("${player.name}: ")
+                .append("<hex:${it.data.chatColour.toHexString(format = HexFormat.UpperCase).substring(2)}>")
+                .append(message)
                 .build()
         )}
     }

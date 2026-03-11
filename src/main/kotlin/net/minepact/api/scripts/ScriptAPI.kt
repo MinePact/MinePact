@@ -7,7 +7,7 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.scripts.exceptions.MissingServiceException
 import net.minepact.api.scripts.registries.ListenerRegistry
 import net.minepact.api.scripts.registries.ScriptServiceRegistry

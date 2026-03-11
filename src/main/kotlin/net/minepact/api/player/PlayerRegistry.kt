@@ -1,6 +1,12 @@
 package net.minepact.api.player
 
+import net.minepact.api.data.repository.PlayerPermissionStateRepository
 import net.minepact.api.data.repository.PlayerRepository
+import net.minepact.api.permissions.GroupRegistry
+import net.minepact.api.permissions.PermissionCache
+import net.minepact.api.permissions.PlayerGroupData
+import net.minepact.api.permissions.PlayerPermissionData
+import net.minepact.api.permissions.graph.PermissionCompiler
 import net.minepact.api.world.Position
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -14,32 +20,49 @@ object PlayerRegistry {
     fun vanished(): List<Player> = online().filter { it.vanished }
 
     fun get(uuid: UUID): CompletableFuture<Player> {
-        playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
+        playersByUUID[uuid]?.let {
+            return CompletableFuture.completedFuture(it)
+        }
 
-        return PlayerRepository.findByUUID(uuid).thenApply { data ->
-            if (data == null) return@thenApply null
-            val player = Player(
-                data,
-                pos = Position.spawn(),
-                online = false,
-                vanished = false
-            )
-            register(player)
-            player
+        return PlayerRepository.findByUUID(uuid).thenCompose { data ->
+            if (data == null) return@thenCompose CompletableFuture.completedFuture(null)
+
+            PlayerPermissionStateRepository.find(uuid).thenApply { state ->
+                val groups = state?.groups
+                    ?.mapNotNull { GroupRegistry.get(it).get() }
+                    ?.toMutableList()
+                    ?: mutableListOf()
+                val perms = state?.permissions ?: mutableSetOf()
+                val player = Player(
+                    data = data,
+                    pos = Position.spawn(),
+                    groupData = PlayerGroupData(groups),
+                    permissionData = PlayerPermissionData(perms),
+                    online = false,
+                    vanished = false
+                )
+
+                register(player)
+                PermissionCache.put(
+                    player.data.uuid,
+                    PermissionCompiler.compile(player)
+                )
+                player
+            }
         }
     }
     fun get(name: String): CompletableFuture<Player> {
         val lower = name.lowercase()
-        nameToUUID[lower]?.let { uuid ->
-            playersByUUID[uuid]?.let {
+        nameToUUID[lower]?.let { uuid -> playersByUUID[uuid]?.let {
                 return CompletableFuture.completedFuture(it)
-            }
-        }
+        } }
         return PlayerRepository.findByName(lower).thenApply { data ->
             if (data == null) return@thenApply null
             val player = Player(
                 data,
                 pos = Position.spawn(),
+                groupData = PlayerGroupData(groups = mutableListOf( /* TODO */)),
+                permissionData = PlayerPermissionData(perms = mutableSetOf( /* TODO */)),
                 online = false,
                 vanished = false
             )

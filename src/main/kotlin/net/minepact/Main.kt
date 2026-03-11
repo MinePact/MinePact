@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import net.luckperms.api.LuckPerms
-
 import net.minepact.api.command.CommandRegister
 import net.minepact.api.config.experimental.ConfigurationRegistry
 import net.minepact.api.data.Database
@@ -25,7 +24,7 @@ import net.minepact.api.reflections.findCommands
 import net.minepact.api.reflections.findEvents
 import net.minepact.api.reflections.findRepositories
 import net.minepact.api.reflections.registerConfigs
-import net.minepact.api.schedular.EventScheduler
+import net.minepact.api.scheduler.EventScheduler
 import net.minepact.api.scripts.ScriptManager
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.restartEmbed
@@ -65,6 +64,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin(), CoroutineScope {
 
     override fun onLoad() {
         instance = this
+
         COMMAND_REGISTRY = CommandRegister()
         EVENT_REGISTRY = EventRegister()
         SERVER_START_TIME = System.currentTimeMillis()
@@ -115,18 +115,18 @@ class Main : org.bukkit.plugin.java.JavaPlugin(), CoroutineScope {
         instance.logger.info("")
     }
     override fun onEnable() {
-        val pluginManager = Bukkit.getPluginManager()
-        pluginManager.plugins.forEach { println(it.name)}
+        //val pluginManager = Bukkit.getPluginManager()
+        //pluginManager.plugins.forEach { println(it.name)}
 
-        val provider = server.servicesManager.getRegistration(LuckPerms::class.java)
+        //val provider = server.servicesManager.getRegistration(LuckPerms::class.java)
 
-        if (provider == null) {
-            logger.severe("LuckPerms API not found!")
-            server.pluginManager.disablePlugin(this)
-            return
-        }
+        //if (provider == null) {
+            //logger.severe("LuckPerms API not found!")
+            //server.pluginManager.disablePlugin(this)
+            //return
+        //}
 
-        LUCKPERMS_API = provider.provider
+        //LUCKPERMS_API = provider.provider
 
         PlayerRegistry.register(Player.CONSOLE)
         BukkitEventBridge(EVENT_REGISTRY).registerAllEvents()

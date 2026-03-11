@@ -8,6 +8,9 @@ import net.minepact.api.event.EventContext
 import net.minepact.api.event.SimpleEventHandler
 import net.minepact.api.math.Vector
 import net.minepact.api.math.helper.vector.vec
+import net.minepact.api.permissions.PermissionCache
+import net.minepact.api.permissions.PermissionInjector
+import net.minepact.api.permissions.graph.PermissionCompiler
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerData
 import net.minepact.api.player.PlayerRegistry
@@ -23,49 +26,49 @@ import org.bukkit.event.player.PlayerKickEvent
 class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
     override fun handle(context: EventContext<PlayerJoinEvent>) {
         val event: PlayerJoinEvent = context.event
-        val player = event.player
-        val uuid = player.uniqueId
-        val currentIp = player.address?.address?.hostAddress
+        val bukkitPlayer = event.player
+        val uuid = bukkitPlayer.uniqueId
+        val currentIp = bukkitPlayer.address?.address?.hostAddress
 
-        event.joinMessage(MiniMessage.miniMessage().deserialize("<dark_grey>[<green><bold>+</bold><dark_grey>] <grey>${player.name}"))
+        event.joinMessage(MiniMessage.miniMessage().deserialize("<dark_grey>[<green><bold>+</bold><dark_grey>] <grey>${bukkitPlayer.name}"))
 
-        val optional = PlayerRepository.findByUUID(uuid)
-        val data: PlayerData
+        PlayerRepository.findByUUID(uuid).thenCompose { existing ->
+            if (existing == null) {
+                val data = PlayerData(
+                    uuid = uuid,
+                    name = bukkitPlayer.name,
+                    ipHistory = currentIp?.let { listOf(it) } ?: listOf(),
+                    discordId = "",
+                    firstJoined = System.currentTimeMillis(),
+                    lastSeen = System.currentTimeMillis())
+                PlayerRepository.insert(data).thenApply { data }
+            } else {
+                existing.lastSeen = System.currentTimeMillis()
 
-        if (optional.get() == null) {
-            data = PlayerData(
-                uuid = uuid,
-                name = player.name,
-                ipHistory = currentIp?.let { listOf(it) } ?: listOf(),
-                discordId = "",
-                firstJoined = System.currentTimeMillis(),
-                lastSeen = System.currentTimeMillis()
-            )
-            PlayerRepository.insert(data)
-        } else {
-            data = optional.get() ?: return
-            if (currentIp != null && !data.ipHistory.contains(currentIp)) {
-                val updatedIps = data.ipHistory + currentIp
-                data.ipHistory = updatedIps
-                PlayerRepository.insert(data)
+                if (currentIp != null && !existing.ipHistory.contains(currentIp)) {
+                    existing.ipHistory = existing.ipHistory + currentIp
+                }
+                PlayerRepository.insert(existing).thenApply { existing }
             }
+        }.thenCompose { PlayerRegistry.get(uuid) }.thenAccept { player ->
+            if (player == null) return@thenAccept
 
-            data.lastSeen = System.currentTimeMillis()
-            PlayerRepository.insert(data)
+            player.online = true
+            player.pos = Position(
+                vector = vec(bukkitPlayer.x, bukkitPlayer.y, bukkitPlayer.z),
+                yaw = bukkitPlayer.yaw,
+                pitch = bukkitPlayer.pitch,
+                world = bukkitPlayer.world.name
+            )
+
+            PermissionInjector.inject(bukkitPlayer)
+            PermissionCache.put(
+                player.data.uuid,
+                PermissionCompiler.compile(player)
+            )
         }
 
-        if (!PlayerRegistry.playersByUUID.containsKey(uuid)) {
-            PlayerRegistry.register(Player(data, true, Position(
-                vector = vec(player.x, player.y, player.z),
-                yaw = player.yaw,
-                pitch = player.pitch,
-                world = player.world.name
-            )))
-        }
-
-        PlayerRegistry.get(uuid).thenAccept { it.online = true }
-
-        PunishmentRepository.findByTarget(player.uniqueId).thenAccept { punishments ->
+        PunishmentRepository.findByTarget(bukkitPlayer.uniqueId).thenAccept { punishments ->
             val activeBan = punishments.firstOrNull { punishment ->
                 punishment.type == PunishmentType.BAN &&
                         !punishment.reverted &&
@@ -74,7 +77,7 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
             }
 
             if (activeBan != null) {
-                player.kick(
+                bukkitPlayer.kick(
                     MiniMessage.miniMessage().deserialize(getPunishmentMessage(activeBan, AnnouncementModifier.SILENT)),
                     PlayerKickEvent.Cause.BANNED
                 )
@@ -82,7 +85,7 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
         }
 
         if (Main.MAIN_CONFIG.spawn.teleportOnJoin) {
-            player.teleport(
+            bukkitPlayer.teleport(
                 Location(
                     Bukkit.getWorld(Main.MAIN_CONFIG.spawn.world),
                     Main.MAIN_CONFIG.spawn.x,

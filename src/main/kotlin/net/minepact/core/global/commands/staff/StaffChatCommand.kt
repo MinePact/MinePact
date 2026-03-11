@@ -11,8 +11,7 @@ import net.minepact.api.messages.Message
 import net.minepact.api.messages.MessageBuilder
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.player.asPlayer
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 
 class StaffChatCommand : Command(
     name = "staffchat",

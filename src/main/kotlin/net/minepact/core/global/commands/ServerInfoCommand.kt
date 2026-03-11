@@ -7,7 +7,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.messages.send
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerInfo
 import java.util.concurrent.CompletableFuture
 

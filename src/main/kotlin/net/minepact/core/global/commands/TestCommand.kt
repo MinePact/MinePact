@@ -6,7 +6,7 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.item.Item
 import net.minepact.api.messages.FormatParser
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import org.bukkit.Material
 import org.bukkit.entity.Player
 

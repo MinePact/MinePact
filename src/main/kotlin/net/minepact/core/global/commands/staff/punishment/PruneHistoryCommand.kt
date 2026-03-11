@@ -12,7 +12,7 @@ import net.minepact.api.messages.send
 import net.minepact.api.misc.getLengthFromIdentifier
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 
 class PruneHistoryCommand : Command(
     name = "prune",

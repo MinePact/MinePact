@@ -7,9 +7,3 @@ load: POSTWORLD
 authors: [dankenyon]
 description: The core plugin for the MinePact server.
 website: https://dev.minepact.net
-
-dependencies:
-  server:
-    LuckPerms:
-      load: BEFORE
-      required: true

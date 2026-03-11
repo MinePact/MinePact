@@ -3,42 +3,52 @@ package net.minepact.api.player
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
-import net.luckperms.api.node.types.InheritanceNode
-import net.luckperms.api.node.types.PermissionNode
 import net.minecraft.server.level.ServerPlayer
 import net.minepact.Main
 import net.minepact.api.math.helper.vector.vec
 import net.minepact.api.messages.FormatParser
 import net.minepact.api.messages.Message
-import net.minepact.api.player.permissions.Group
-import net.minepact.api.player.permissions.Permissable
-import net.minepact.api.player.permissions.Permission
-import net.minepact.api.server.Server
+import net.minepact.api.permissions.Group
+import net.minepact.api.permissions.Permissable
+import net.minepact.api.permissions.Permission
+import net.minepact.api.permissions.PermissionCache
+import net.minepact.api.permissions.PermissionManager
+import net.minepact.api.permissions.PermissionPersistence
+import net.minepact.api.permissions.PlayerGroupData
+import net.minepact.api.permissions.PlayerPermissionData
 import net.minepact.api.world.Position
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.entity.CraftPlayer
-import org.jetbrains.kotlin.it.unimi.dsi.fastutil.objects.aS
 import org.bukkit.entity.Player as BukkitPlayer
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 class Player(
     val data: PlayerData,
+    val groupData: PlayerGroupData,
+    val permissionData: PlayerPermissionData,
     var pos: Position,
     var online: Boolean,
     var vanished: Boolean
 ) : Permissable {
     companion object {
         val CONSOLE: Player = Player(
-            PlayerData(
+            data = PlayerData(
                 uuid = UUID(0, 0),
                 name = "CONSOLE",
                 ipHistory = listOf("127.0.0.1"),
                 discordId = "",
                 firstJoined = 0L,
                 lastSeen = 0L
+            ),
+            groupData = PlayerGroupData(
+                groups = mutableListOf()
+            ),
+            permissionData = PlayerPermissionData(
+                perms = mutableSetOf()
             ),
             pos = Position(
                 vector = vec(0, 0, 0),
@@ -178,114 +188,44 @@ class Player(
     /* ------------------------------------- PERMISSIONS ------------------------------------- */
 
     override fun getPermissions(): Set<Permission> {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return emptySet()
-
-        return user.nodes
-            .filterIsInstance<PermissionNode>()
-            .map { Permission(
-                    node = it.permission,
-                    expiresAt = it.expiry
-            ) }.toSet()
+        return permissionData.perms
     }
-    override fun hasPermission(permission: Permission): Boolean {
-        if (data.uuid == CONSOLE.data.uuid) return true
-
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return false
-
-        return user.cachedData.permissionData
-            .checkPermission(permission.node)
-            .asBoolean()
-    }
+    override fun hasPermission(permission: Permission): Boolean = PermissionManager.hasPermission(this, permission.node)
+    fun hasPermission(node: String): Boolean = PermissionManager.hasPermission(this, node)
     override fun addPermission(permission: Permission) {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return
-
-        val node = PermissionNode
-            .builder(permission.node)
-            .build()
-
-        user.data().add(node)
-        Main.LUCKPERMS_API.userManager.saveUser(user)
+        permissionData.perms.add(permission)
+        PermissionCache.invalidate(data.uuid)
+        PermissionPersistence.markDirty(this)
     }
     override fun addTemporaryPermission(permission: Permission, duration: Duration) {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid) ?: return
-        val node = PermissionNode.builder(permission.node)
-            .expiry(duration)
-            .build()
-
-        user.data().add(node)
-        Main.LUCKPERMS_API.userManager.saveUser(user)
+        permissionData.perms.add(permission.copy(expiresAt = Instant.now().plus(duration)))
+        PermissionCache.invalidate(data.uuid)
+        PermissionPersistence.markDirty(this)
     }
     override fun removePermission(permission: Permission) {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return
-
-        val node = PermissionNode
-            .builder(permission.node)
-            .build()
-
-        user.data().remove(node)
-        Main.LUCKPERMS_API.userManager.saveUser(user)
+        permissionData.perms.removeIf { it.node == permission.node }
+        PermissionCache.invalidate(data.uuid)
+        PermissionPersistence.markDirty(this)
     }
 
     fun getPrimaryGroup(): Group? {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return null
-
-        val groupName = user.primaryGroup
-        val group = Main.LUCKPERMS_API.groupManager.getGroup(groupName)
-            ?: return null
-
-        return Group(
-            name = group.name,
-            displayName = group.displayName,
-            weight = group.weight.orElse(0),
-            prefix = group.cachedData.metaData.prefix,
-            suffix = group.cachedData.metaData.suffix
-        )
-    }
-    override fun getGroups(): Set<Group> {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return emptySet()
-
-        return user.getInheritedGroups(user.queryOptions)
-            .map {
-                Group(
-                    name = it.name,
-                    displayName = it.displayName,
-                    weight = it.weight.orElse(0),
-                    prefix = it.cachedData.metaData.prefix,
-                    suffix = it.cachedData.metaData.suffix
-                )
-            }
-            .toSet()
-    }
-    override fun hasGroup(group: Group): Boolean {
-        return getGroups().any { it.name.equals(group.name, true) }
+        return groupData.groups.maxByOrNull { it.weight }
     }
     override fun addGroup(group: Group) {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return
-
-        val node = InheritanceNode
-            .builder(group.name)
-            .build()
-
-        user.data().add(node)
-        Main.LUCKPERMS_API.userManager.saveUser(user)
+        groupData.groups.add(group)
+        PermissionCache.invalidate(data.uuid)
+        PermissionPersistence.markDirty(this)
     }
     override fun removeGroup(group: Group) {
-        val user = Main.LUCKPERMS_API.userManager.getUser(data.uuid)
-            ?: return
-
-        val node = InheritanceNode
-            .builder(group.name)
-            .build()
-
-        user.data().remove(node)
-        Main.LUCKPERMS_API.userManager.saveUser(user)
+        groupData.groups.remove(group)
+        PermissionCache.invalidate(data.uuid)
+        PermissionPersistence.markDirty(this)
+    }
+    override fun getGroups(): Set<Group> {
+        return groupData.groups.toSet()
+    }
+    override fun hasGroup(group: Group): Boolean {
+        return groupData.groups.contains(group)
     }
 
     /* ------------------------------------- HELPER ------------------------------------- */

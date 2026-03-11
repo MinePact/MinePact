@@ -2,8 +2,8 @@ package net.minepact.core.global.events.timed
 
 import net.minepact.Main
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.schedular.TimeInterval
-import net.minepact.api.schedular.TimedEvent
+import net.minepact.api.scheduler.TimeInterval
+import net.minepact.api.scheduler.TimedEvent
 
 class VanishEvent : TimedEvent(
     interval = TimeInterval.SECOND / 2

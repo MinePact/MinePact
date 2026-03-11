@@ -9,7 +9,7 @@ import net.minepact.api.messages.send
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.player.discord.SyncData
 import net.minepact.api.player.discord.generateSyncCode
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import org.bukkit.entity.Player
 
 class SyncCommand : Command(

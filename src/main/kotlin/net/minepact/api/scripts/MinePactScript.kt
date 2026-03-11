@@ -6,7 +6,7 @@ import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerType
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority

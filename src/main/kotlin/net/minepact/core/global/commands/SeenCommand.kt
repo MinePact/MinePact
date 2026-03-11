@@ -10,7 +10,7 @@ import net.minepact.api.messages.send
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 
 class SeenCommand : Command(
     name = "seen",

@@ -4,9 +4,9 @@ import net.minepact.api.config.custom.exception.ConfigException
 import net.minepact.api.config.custom.interfaces.FileParser
 import net.minepact.api.config.custom.interfaces.FileReader
 import net.minepact.api.config.custom.interfaces.FileWriter
-import net.minepact.api.config.custom.minepact.MinePactFileParser
-import net.minepact.api.config.custom.minepact.MinePactFileReader
-import net.minepact.api.config.custom.minepact.MinePactFileWriter
+import net.minepact.api.config.custom.type.minepact.MinePactFileParser
+import net.minepact.api.config.custom.type.minepact.MinePactFileReader
+import net.minepact.api.config.custom.type.minepact.MinePactFileWriter
 import java.io.File
 
 sealed class ConfigType {

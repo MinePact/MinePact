@@ -8,7 +8,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.messages.send
-import net.minepact.api.player.permissions.Permission
+import net.minepact.api.permissions.Permission
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player

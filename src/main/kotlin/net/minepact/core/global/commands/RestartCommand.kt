@@ -6,8 +6,8 @@ import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.player.Player
-import net.minepact.api.player.permissions.Permission
-import net.minepact.api.schedular.EventScheduler
+import net.minepact.api.permissions.Permission
+import net.minepact.api.scheduler.EventScheduler
 import net.minepact.core.global.events.timed.RestartEvent
 
 class RestartCommand : Command(

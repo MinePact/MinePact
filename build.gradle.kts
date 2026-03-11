@@ -71,7 +71,7 @@ tasks {
     shadowJar {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         archiveClassifier.set("")
-        destinationDirectory = layout.buildDirectory.dir("libs")
+        destinationDirectory = file("C:\\Users\\danhk\\Desktop\\servers\\mp\\plugins")
 
         minimize {
             exclude(dependency("org.jetbrains.kotlin:kotlin-compiler-embeddable"))
