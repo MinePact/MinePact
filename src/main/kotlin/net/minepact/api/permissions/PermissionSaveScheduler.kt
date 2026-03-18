@@ -7,7 +7,6 @@ import net.minepact.api.player.PlayerRegistry
 import org.bukkit.Bukkit
 
 object PermissionSaveScheduler {
-
     fun start() {
         Bukkit.getScheduler().runTaskTimerAsynchronously(
             Main.instance,
@@ -25,13 +24,22 @@ object PermissionSaveScheduler {
         }
     }
     fun savePlayer(player: Player) {
-        val state = PlayerPermissionState(
+        val globalState = PlayerPermissionState(
             uuid = player.data.uuid,
-            groups = player.groupData.groups.map { it.name }.toMutableList(),
-            permissions = player.permissionData.perms
+            serverId = "GLOBAL",
+            groups = player.globalGroupData.groups.map { it.name }.toMutableList(),
+            permissions = player.globalPermissionData.perms
+        )
+        val localState = PlayerPermissionState(
+            uuid = player.data.uuid,
+            serverId = Main.SERVER.info.uuid.toString(),
+            groups = player.localGroupData.groups.map { it.name }.toMutableList(),
+            permissions = player.localPermissionData.perms
         )
 
-        PlayerPermissionStateRepository.insert(state)
+        PlayerPermissionStateRepository.insert(globalState)
+        PlayerPermissionStateRepository.insert(localState)
+
         PermissionPersistence.clear(player.data.uuid)
     }
 }

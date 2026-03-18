@@ -14,5 +14,4 @@ object PermissionManager {
 
         return compiled.has(node)
     }
-
 }

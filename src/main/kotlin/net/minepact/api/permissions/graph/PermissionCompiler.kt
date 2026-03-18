@@ -7,8 +7,13 @@ import java.time.Instant
 object PermissionCompiler {
     fun compile(player: Player): CompiledPermissionMap {
         val compiled = CompiledPermissionMap()
-        player.permissionData.perms.forEach { if (!expired(it)) compiled.permissions[it.node] = it.value }
-        player.groupData.groups.forEach { group ->
+        player.localPermissionData.perms.forEach { if (!expired(it)) compiled.permissions[it.node] = it.value }
+        player.localGroupData.groups.forEach { group ->
+            val node = PermissionGraph.getNode(group) ?: return@forEach
+            collect(node, compiled.permissions)
+        }
+        player.globalPermissionData.perms.forEach { if (!expired(it)) compiled.permissions[it.node] = it.value }
+        player.globalGroupData.groups.forEach { group ->
             val node = PermissionGraph.getNode(group) ?: return@forEach
             collect(node, compiled.permissions)
         }

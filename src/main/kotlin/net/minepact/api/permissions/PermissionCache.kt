@@ -11,9 +11,7 @@ object PermissionCache {
     fun put(uuid: UUID, map: CompiledPermissionMap) {
         cache[uuid] = map
     }
-
     fun invalidate(uuid: UUID) {
-
         cache.remove(uuid)
     }
 }

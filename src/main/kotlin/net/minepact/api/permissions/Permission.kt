@@ -9,7 +9,6 @@ data class Permission(
 ) {
     companion object {
         fun fromString(string: String): Permission {
-
             val parts = string
                 .replace("[", "")
                 .replace("]", "")
@@ -17,9 +16,7 @@ data class Permission(
 
             val node = parts[0]
             val value = parts[1].toBoolean()
-
-            val expiresAt =
-                parts.getOrNull(2)
+            val expiresAt = parts.getOrNull(2)
                     ?.takeIf { it.isNotBlank() && it != "null" }
                     ?.let { Instant.parse(it) }
 

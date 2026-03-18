@@ -23,5 +23,4 @@ object GroupRegistry {
         }
     }
     fun all(): Collection<Group> = groups.values
-
 }

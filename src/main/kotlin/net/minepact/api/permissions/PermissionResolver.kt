@@ -7,8 +7,10 @@ object PermissionResolver {
     fun resolve(player: Player, node: String): Boolean {
         val permissions = mutableMapOf<String, Boolean>()
 
-        player.permissionData.perms.forEach { if (!expired(it)) permissions[it.node] = it.value }
-        player.groupData.groups.forEach { group -> collectGroupPermissions(group, permissions) }
+        player.localPermissionData.perms.forEach { if (!expired(it)) permissions[it.node] = it.value }
+        player.localGroupData.groups.forEach { group -> collectGroupPermissions(group, permissions) }
+        player.globalPermissionData.perms.forEach { if (!expired(it)) permissions[it.node] = it.value }
+        player.globalGroupData.groups.forEach { group -> collectGroupPermissions(group, permissions) }
         permissions[node]?.let { return it }
 
         val parts = node.split(".")

@@ -1,9 +1,11 @@
 package net.minepact.api.player
 
+import net.minepact.Main
 import net.minepact.api.data.repository.PlayerPermissionStateRepository
 import net.minepact.api.data.repository.PlayerRepository
 import net.minepact.api.permissions.GroupRegistry
 import net.minepact.api.permissions.PermissionCache
+import net.minepact.api.permissions.PermissionScope
 import net.minepact.api.permissions.PlayerGroupData
 import net.minepact.api.permissions.PlayerPermissionData
 import net.minepact.api.permissions.graph.PermissionCompiler
@@ -12,6 +14,7 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 object PlayerRegistry {
+
     val playersByUUID: MutableMap<UUID, Player> = mutableMapOf()
     private val nameToUUID: MutableMap<String, UUID> = mutableMapOf()
 
@@ -19,57 +22,75 @@ object PlayerRegistry {
     fun online(): List<Player> = playersByUUID.values.filter { it.online }
     fun vanished(): List<Player> = online().filter { it.vanished }
 
+    /* ------------------------------------- GET BY UUID ------------------------------------- */
+
     fun get(uuid: UUID): CompletableFuture<Player> {
-        playersByUUID[uuid]?.let {
-            return CompletableFuture.completedFuture(it)
-        }
+        playersByUUID[uuid]?.let { return CompletableFuture.completedFuture(it) }
 
         return PlayerRepository.findByUUID(uuid).thenCompose { data ->
             if (data == null) return@thenCompose CompletableFuture.completedFuture(null)
 
-            PlayerPermissionStateRepository.find(uuid).thenApply { state ->
-                val groups = state?.groups
-                    ?.mapNotNull { GroupRegistry.get(it).get() }
-                    ?.toMutableList()
-                    ?: mutableListOf()
-                val perms = state?.permissions ?: mutableSetOf()
-                val player = Player(
-                    data = data,
-                    pos = Position.spawn(),
-                    groupData = PlayerGroupData(groups),
-                    permissionData = PlayerPermissionData(perms),
-                    online = false,
-                    vanished = false
-                )
+            PlayerPermissionStateRepository.findAll(uuid, Main.SERVER.info.uuid.toString())
+                .thenApply { states ->
+                    val globalState = states.firstOrNull { it.serverId == "GLOBAL" }
+                    val localState = states.firstOrNull { it.serverId == Main.SERVER.info.uuid.toString() }
 
-                register(player)
-                PermissionCache.put(
-                    player.data.uuid,
-                    PermissionCompiler.compile(player)
-                )
-                player
-            }
+                    val globalGroups = globalState?.groups
+                        ?.mapNotNull { GroupRegistry.get(it).join() }
+                        ?.toMutableList()
+                        ?: mutableListOf()
+
+                    val localGroups = localState?.groups
+                        ?.mapNotNull { GroupRegistry.get(it).join() }
+                        ?.toMutableList()
+                        ?: mutableListOf()
+
+                    val globalPerms = globalState?.permissions?.toMutableSet() ?: mutableSetOf()
+                    val localPerms = localState?.permissions?.toMutableSet() ?: mutableSetOf()
+
+                    val player = Player(
+                        data = data,
+                        pos = Position.spawn(),
+
+                        globalGroupData = PlayerGroupData(globalGroups),
+                        localGroupData = PlayerGroupData(localGroups),
+
+                        globalPermissionData = PlayerPermissionData(globalPerms),
+                        localPermissionData = PlayerPermissionData(localPerms),
+
+                        online = false,
+                        vanished = false
+                    )
+
+                    register(player)
+
+                    PermissionCache.put(
+                        player.data.uuid,
+                        PermissionCompiler.compile(player)
+                    )
+
+                    player
+                }
         }
     }
+
+    /* ------------------------------------- GET BY NAME ------------------------------------- */
+
     fun get(name: String): CompletableFuture<Player> {
         val lower = name.lowercase()
-        nameToUUID[lower]?.let { uuid -> playersByUUID[uuid]?.let {
+        nameToUUID[lower]?.let { uuid ->
+            playersByUUID[uuid]?.let {
                 return CompletableFuture.completedFuture(it)
-        } }
-        return PlayerRepository.findByName(lower).thenApply { data ->
-            if (data == null) return@thenApply null
-            val player = Player(
-                data,
-                pos = Position.spawn(),
-                groupData = PlayerGroupData(groups = mutableListOf( /* TODO */)),
-                permissionData = PlayerPermissionData(perms = mutableSetOf( /* TODO */)),
-                online = false,
-                vanished = false
-            )
-            register(player)
-            player
+            }
+        }
+
+        return PlayerRepository.findByName(lower).thenCompose { data ->
+            if (data == null) return@thenCompose CompletableFuture.completedFuture(null)
+            get(data.uuid)
         }
     }
+
+    /* ------------------------------------- REGISTRY ------------------------------------- */
 
     fun register(player: Player) {
         playersByUUID[player.data.uuid] = player
