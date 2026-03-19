@@ -6,6 +6,8 @@ import net.kyori.adventure.title.Title
 import net.minecraft.server.level.ServerPlayer
 import net.minepact.Main
 import net.minepact.api.data.repository.LogRepository
+import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.data.repository.ServerRepository
 import net.minepact.api.economy.EconomyHolder
 import net.minepact.api.logging.LogInfo
 import net.minepact.api.math.helper.vector.vec
@@ -20,6 +22,8 @@ import net.minepact.api.permissions.PermissionPersistence
 import net.minepact.api.permissions.PermissionScope
 import net.minepact.api.permissions.PlayerGroupData
 import net.minepact.api.permissions.PlayerPermissionData
+import net.minepact.api.punishment.Punishment
+import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.world.Position
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
@@ -33,25 +37,25 @@ import java.util.*
 
 class Player(
     val data: PlayerData,
+    var ipHistory: MutableList<String>,
     val globalGroupData: PlayerGroupData,
     val localGroupData: PlayerGroupData,
     val globalPermissionData: PlayerPermissionData,
     val localPermissionData: PlayerPermissionData,
-    // val economyData: EconomyData,
     var pos: Position,
     var online: Boolean,
     var vanished: Boolean
-) : Permissable, EconomyHolder {
+) : Permissable {
     companion object {
         val CONSOLE: Player = Player(
             data = PlayerData(
                 uuid = UUID(0, 0),
                 name = "CONSOLE",
-                ipHistory = listOf("127.0.0.1"),
                 discordId = "",
                 firstJoined = 0L,
                 lastSeen = 0L
             ),
+            ipHistory = mutableListOf("127.0.0.1"),
             globalGroupData = PlayerGroupData(groups = mutableListOf()),
             globalPermissionData = PlayerPermissionData(perms = mutableSetOf()),
             localGroupData = PlayerGroupData(groups = mutableListOf()),
@@ -225,26 +229,126 @@ class Player(
         } else Main.instance.logger.info("[Vanish] Could not hide ${target.data.name} from ${data.name}")
     }
 
+    /* ------------------------------------- PUNISHMENTS ------------------------------------- */
+
+    fun kick(staff: Player, reason: String, global: Boolean = false) {
+        if (!online || console()) return
+        PunishmentRepository.insert(Punishment(
+            servers = determineServers(global),
+            type = PunishmentType.KICK,
+            target = data.uuid,
+            targetIp = null,
+            issuer = staff.data.uuid,
+            reason = reason,
+            punishedAt = System.currentTimeMillis(),
+            expiresAt = 0L,
+        ))
+        disconnect("")
+    }
+    fun disconnect(message: Message) {
+        if (!online || console()) return
+        Bukkit.getPlayer(data.uuid)?.kick(message.toAdventureComponent())
+    }
+    fun disconnect(message: String) {
+        if (!online || console()) return
+        Bukkit.getPlayer(data.uuid)?.kick(Component.text(message))
+    }
+    fun disconnect(message: Component) {
+        if (!online || console()) return
+        Bukkit.getPlayer(data.uuid)?.kick(message)
+    }
+
+    fun warn(staff: Player, length: Long = Long.MIN_VALUE, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun unwarn(staff: Player, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+
+    fun mute(staff: Player, length: Long = Long.MIN_VALUE, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun unmute(staff: Player, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun getActiveMute(): Punishment? {
+        if (console()) return null
+        return PunishmentRepository.findByTarget(data.uuid).get().firstOrNull { punishment ->
+            punishment.type == PunishmentType.MUTE &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+    fun isMuted(): Boolean {
+        if (console()) return false
+        return PunishmentRepository.findByTarget(data.uuid).get().any { punishment ->
+            punishment.type == PunishmentType.MUTE &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+
+    fun ban(staff: Player, length: Long = Long.MIN_VALUE, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun unban(staff: Player, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun getActiveBan(): Punishment? {
+        if (console()) return null
+        return PunishmentRepository.findByTarget(data.uuid).get().firstOrNull { punishment ->
+            punishment.type == PunishmentType.BAN &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+    fun isBanned(): Boolean {
+        if (console()) return false
+        return PunishmentRepository.findByTarget(data.uuid).get().any { punishment ->
+            punishment.type == PunishmentType.BAN &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+
+    fun ipban(staff: Player, length: Long = Long.MIN_VALUE, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun unipban(staff: Player, reason: String = "No reason provided.", global: Boolean = false) {
+
+    }
+    fun getActiveIpBan(): Punishment? {
+        if (console()) return null
+        return PunishmentRepository.findByTarget(data.uuid).get().firstOrNull { punishment ->
+            punishment.type == PunishmentType.IP_BAN &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+    fun isIpBanned(): Boolean {
+        if (console()) return false
+        return PunishmentRepository.findByTarget(data.uuid).get().any { punishment ->
+            punishment.type == PunishmentType.IP_BAN &&
+                    !punishment.reverted &&
+                    punishment.servers.contains(Main.SERVER.info.uuid) &&
+                    System.currentTimeMillis() < punishment.expiresAt
+        }
+    }
+
+    private fun determineServers(global: Boolean): List<UUID> {
+        return if (global) ServerRepository.findAll().get().map { it.uuid }
+        else listOf(Main.SERVER.info.uuid)
+    }
+
     /* ------------------------------------- ECONOMY ------------------------------------- */
-    /*
-    override fun get(currency: Currency): Double {
 
-    }
-    override fun set(currency: Currency, amount: Double) {
+    // TODO
 
-    }
-
-    override fun give(currency: Currency, amount: Double) {
-
-    }
-    override fun take(currency: Currency, amount: Double) {
-
-    }
-    override fun clear(currency: Currency) {
-
-    }
-
-    */
     /* ------------------------------------- PERMISSIONS ------------------------------------- */
 
     override fun getPermissions(): Set<Permission> {

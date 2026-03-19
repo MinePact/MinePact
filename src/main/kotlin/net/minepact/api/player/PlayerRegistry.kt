@@ -30,8 +30,7 @@ object PlayerRegistry {
         return PlayerRepository.findByUUID(uuid).thenCompose { data ->
             if (data == null) return@thenCompose CompletableFuture.completedFuture(null)
 
-            PlayerPermissionStateRepository.findAll(uuid, Main.SERVER.info.uuid.toString())
-                .thenApply { states ->
+            PlayerPermissionStateRepository.findAll(uuid, Main.SERVER.info.uuid.toString()).thenApply { states ->
                     val globalState = states.firstOrNull { it.serverId == "GLOBAL" }
                     val localState = states.firstOrNull { it.serverId == Main.SERVER.info.uuid.toString() }
 
@@ -52,9 +51,10 @@ object PlayerRegistry {
                         data = data,
                         pos = Position.spawn(),
 
+                        ipHistory = mutableListOf(),
+
                         globalGroupData = PlayerGroupData(globalGroups),
                         localGroupData = PlayerGroupData(localGroups),
-
                         globalPermissionData = PlayerPermissionData(globalPerms),
                         localPermissionData = PlayerPermissionData(localPerms),
 

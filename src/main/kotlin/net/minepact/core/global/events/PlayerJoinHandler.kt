@@ -37,17 +37,12 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
                 val data = PlayerData(
                     uuid = uuid,
                     name = bukkitPlayer.name,
-                    ipHistory = currentIp?.let { listOf(it) } ?: listOf(),
                     discordId = "",
                     firstJoined = System.currentTimeMillis(),
                     lastSeen = System.currentTimeMillis())
                 PlayerRepository.insert(data).thenApply { data }
             } else {
                 existing.lastSeen = System.currentTimeMillis()
-
-                if (currentIp != null && !existing.ipHistory.contains(currentIp)) {
-                    existing.ipHistory = existing.ipHistory + currentIp
-                }
                 PlayerRepository.insert(existing).thenApply { existing }
             }
         }.thenCompose { PlayerRegistry.get(uuid) }.thenAccept { player ->
@@ -66,35 +61,9 @@ class PlayerJoinHandler : SimpleEventHandler<PlayerJoinEvent>() {
                 player.data.uuid,
                 PermissionCompiler.compile(player)
             )
-        }
 
-        PunishmentRepository.findByTarget(bukkitPlayer.uniqueId).thenAccept { punishments ->
-            val activeBan = punishments.firstOrNull { punishment ->
-                punishment.type == PunishmentType.BAN &&
-                        !punishment.reverted &&
-                        System.currentTimeMillis() < punishment.expiresAt &&
-                        punishment.servers.contains(Main.SERVER.info.uuid)
-            }
-
-            if (activeBan != null) {
-                bukkitPlayer.kick(
-                    MiniMessage.miniMessage().deserialize(getPunishmentMessage(activeBan, AnnouncementModifier.SILENT)),
-                    PlayerKickEvent.Cause.BANNED
-                )
-            }
-        }
-
-        if (Main.MAIN_CONFIG.spawn.teleportOnJoin) {
-            bukkitPlayer.teleport(
-                Location(
-                    Bukkit.getWorld(Main.MAIN_CONFIG.spawn.world),
-                    Main.MAIN_CONFIG.spawn.x,
-                    Main.MAIN_CONFIG.spawn.y,
-                    Main.MAIN_CONFIG.spawn.z,
-                    Main.MAIN_CONFIG.spawn.yaw,
-                    Main.MAIN_CONFIG.spawn.pitch
-                )
-            )
+            if (player.isBanned()) player.disconnect(getPunishmentMessage(player.getActiveBan()!!, AnnouncementModifier.SILENT))
+            else if (player.isIpBanned()) player.disconnect(getPunishmentMessage(player.getActiveIpBan()!!, AnnouncementModifier.SILENT))
         }
     }
 }

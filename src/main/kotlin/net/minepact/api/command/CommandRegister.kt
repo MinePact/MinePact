@@ -3,7 +3,6 @@ package net.minepact.api.command
 import net.minepact.Main
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.parseArgument
-import net.minepact.api.data.helper.DataType
 import net.minepact.api.logging.LogInfo
 import net.minepact.api.logging.LogType
 import net.minepact.api.messages.send
@@ -16,6 +15,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
 import java.util.UUID
+import net.minepact.api.discord.Webhooks.LOGGING_WEBHOOK
 
 /**
  * A class responsible for the registration and function of all commands when ran.
@@ -51,16 +51,12 @@ class CommandRegister {
                 val parsedArgs = mutableListOf<Argument<*>>()
                 for (index in args.indices) {
                     val expectedArguments = command.usage.arguments
-
-                    if (expectedArguments.isEmpty()) {
-                        sender.send("<red>Invalid arguments. Usage: ${command.usage}")
-                        return true
-                    }
                     val parsed = expectedArguments
                         .filter { expected -> expected.permission?.let(sender::hasPermission) ?: true }
                         .filter { expected -> expected.senderFilter?.invoke(sender) ?: true }
                         .firstNotNullOfOrNull { expected -> parseArgument(args[index], expected) }
-                    if (parsed == null) {
+
+                    if (expectedArguments.isEmpty() || parsed == null) {
                         sender.send("<red>Invalid arguments. Usage: ${command.usage}")
                         return true
                     }
@@ -76,35 +72,29 @@ class CommandRegister {
                     return true
                 }
 
-                return try {
-                    if (RAN_COMMANDS.contains(sender) && RAN_COMMANDS[sender]!!.contains(command)) {
-                        val lastRan = RAN_COMMANDS[sender]!![command]!!
-                        val cooldownMillis = (command.cooldown * 1000).toLong()
-                        if ((System.currentTimeMillis() - lastRan < cooldownMillis) && !sender.hasPermission("minepact.cooldown.bypass")) {
-                            val timeLeft: Double = ((cooldownMillis - (System.currentTimeMillis() - lastRan)) / 1000.0)
-                            sender.send("<red>You must wait $timeLeft seconds before using this command again.")
-                            return true
-                        }
+                if (RAN_COMMANDS.contains(sender) && RAN_COMMANDS[sender]!!.contains(command)) {
+                    val lastRan = RAN_COMMANDS[sender]!![command]!!
+                    val cooldownMillis = (command.cooldown * 1000).toLong()
+                    if ((System.currentTimeMillis() - lastRan < cooldownMillis) && !sender.hasPermission("minepact.cooldown.bypass")) {
+                        val timeLeft: Double = ((cooldownMillis - (System.currentTimeMillis() - lastRan)) / 1000.0)
+                        sender.send("<red>You must wait $timeLeft seconds before using this command again.")
+                        return true
                     }
-
-                    RAN_COMMANDS[sender] = RAN_COMMANDS.getOrDefault(sender, mutableMapOf())
-                        .also { it[command] = System.currentTimeMillis() }
-                    if (command.log) Main.LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}")
-
-                    sender.asPlayer().writeLog(LogInfo(
-                        serverId = Main.SERVER.info.uuid,
-                        senderId = (sender as? Player)?.uniqueId ?: UUID(0, 0),
-                        type = LogType.COMMAND,
-                        timestamp =System.currentTimeMillis(),
-                        content = "/${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}",
-                        suspicious = command.log
-                    ))
-
-                    command.execute(sender.asPlayer(), parsedArgs) == Result.SUCCESS
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    false
                 }
+
+                RAN_COMMANDS[sender] = RAN_COMMANDS.getOrDefault(sender, mutableMapOf()).also { it[command] = System.currentTimeMillis() }
+                if (command.log) LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${args.joinToString(" ")}")
+
+                sender.asPlayer().writeLog(LogInfo(
+                    serverId = Main.SERVER.info.uuid,
+                    senderId = (sender as? Player)?.uniqueId ?: UUID(0, 0),
+                    type = LogType.COMMAND,
+                    timestamp =System.currentTimeMillis(),
+                    content = "/${command.name} ${args.joinToString(" ")}",
+                    suspicious = command.log
+                ))
+
+                return command.execute(sender.asPlayer(), parsedArgs) == Result.SUCCESS
             }
 
             override fun tabComplete(

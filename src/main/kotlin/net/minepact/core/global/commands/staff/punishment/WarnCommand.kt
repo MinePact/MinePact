@@ -9,6 +9,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.discord.Webhooks.PUNISHMENTS_WEBHOOK
 import net.minepact.api.messages.send
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
@@ -83,7 +84,7 @@ class WarnCommand : Command(
             AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
         }
 
-        Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(warnEmbed(punishment, listOf(scope, announcement))))
+        PUNISHMENTS_WEBHOOK.sendMessage("", listOf(warnEmbed(punishment, listOf(scope, announcement))))
         return Result.SUCCESS
     }
 }

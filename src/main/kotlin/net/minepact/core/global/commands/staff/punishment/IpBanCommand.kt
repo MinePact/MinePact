@@ -10,6 +10,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.discord.Webhooks.PUNISHMENTS_WEBHOOK
 import net.minepact.api.messages.send
 import net.minepact.api.misc.formatDate
 import net.minepact.api.player.PlayerRegistry
@@ -60,7 +61,6 @@ class IpBanCommand : Command(
         val targetName: String = args[0].value as String
         val target: net.minepact.api.player.Player = PlayerRegistry.get(targetName).get()
 
-
         val rawTokens: MutableList<String> = extractRawTokens(args)
         val modifiers = retrieveModifiers(rawTokens)
 
@@ -101,7 +101,7 @@ class IpBanCommand : Command(
                 AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
             }
 
-            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(ipbanEmbed(punishment, listOf(scope, announcement))))
+            PUNISHMENTS_WEBHOOK.sendMessage("", listOf(ipbanEmbed(punishment, listOf(scope, announcement))))
         }
 
         return Result.SUCCESS

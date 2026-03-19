@@ -1,6 +1,9 @@
 package net.minepact.api.discord
 
 import net.minepact.Main
+import net.minepact.api.config.custom.ConfigManager
+import net.minepact.api.config.custom.helper.MinePactConfigType
+import net.minepact.api.config.custom.helper.get
 import net.minepact.api.discord.embed.Embed
 import java.net.URI
 import java.net.URL
@@ -11,7 +14,7 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 class Webhook(
-    var webhookUrl: String? = Main.MAIN_CONFIG.webhookUrl,
+    var webhookUrl: String? = ConfigManager.file<MinePactConfigType>("config.mpc").reader.get<String>("webhook.default"),
     val username: String,
     val avatarUrl: URL?,
 ) {

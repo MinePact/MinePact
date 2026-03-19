@@ -19,7 +19,11 @@ enum class ArgumentInputType {
             DOUBLE -> input.toDouble()
             FLOAT -> input.toFloat()
             LONG -> input.toLong()
-            BOOLEAN -> input.equals("true", true) || input.equals("false", true)
+            BOOLEAN -> when {
+                input.equals("true", true) -> true
+                input.equals("false", true) -> false
+                else -> null
+            }
         }
     } catch (e: Exception) {
         null
