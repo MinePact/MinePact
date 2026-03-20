@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands.staff.punishment
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -15,6 +14,7 @@ import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentType
+import net.minepact.api.command.Command
 
 class HistoryCommand : Command(
     name = "history",

@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -11,6 +10,7 @@ import net.minepact.api.misc.formatDuration
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.permissions.Permission
+import net.minepact.api.command.Command
 
 class SeenCommand : Command(
     name = "seen",

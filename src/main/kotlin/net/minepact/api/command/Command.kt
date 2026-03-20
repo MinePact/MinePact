@@ -34,18 +34,6 @@ abstract class Command(
     val maxArgs: Int = Int.MAX_VALUE,
     val log: Boolean = false,
 ) {
-    @Deprecated("")
-    protected val subCommands: MutableMap<String, SubCommand> = mutableMapOf()
-
-    @Deprecated("")
-    fun getSubCommand(name: String?): SubCommand? = subCommands[name?.lowercase()]
-    @Deprecated("")
-    fun allSubCommands(): Collection<SubCommand> = subCommands.values
-    @Deprecated("")
-    fun registerSubCommand(sub: SubCommand) {
-        subCommands[sub.name.lowercase()] = sub
-    }
-
     abstract fun execute(sender: Player, args: MutableList<Argument<*>>): Result
 
     override fun toString(): String = formatString(
@@ -58,7 +46,6 @@ abstract class Command(
         "\tcooldown=$cooldown, ",
         "\tplayerOnly=$playerOnly, ",
         "\tmaxArgs=$maxArgs, ",
-        "\tsubCommands=${subCommands.keys}",
         "]"
     )
     override fun equals(other: Any?): Boolean {
@@ -73,7 +60,6 @@ abstract class Command(
         result = 31 * result + permission.hashCode()
         result = 31 * result + usage.hashCode()
         result = 31 * result + aliases.hashCode()
-        result = 31 * result + subCommands.hashCode()
         return result
     }
 }

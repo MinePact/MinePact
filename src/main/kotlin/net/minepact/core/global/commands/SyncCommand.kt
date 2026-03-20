@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
@@ -11,6 +10,7 @@ import net.minepact.api.player.discord.SyncData
 import net.minepact.api.player.discord.generateSyncCode
 import net.minepact.api.permissions.Permission
 import org.bukkit.entity.Player
+import net.minepact.api.command.Command
 
 class SyncCommand : Command(
     name = "sync",

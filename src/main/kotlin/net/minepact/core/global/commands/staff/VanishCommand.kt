@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands.staff
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
@@ -8,6 +7,7 @@ import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerType
 import org.bukkit.craftbukkit.entity.CraftPlayer
+import net.minepact.api.command.Command
 
 class VanishCommand : Command(
     server = ServerType.GLOBAL,

@@ -8,7 +8,7 @@ import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerType
 
-open class Command : Command(
+open class aCommand : Command(
     server = ServerType.GLOBAL,
     name = "",
     description = "",

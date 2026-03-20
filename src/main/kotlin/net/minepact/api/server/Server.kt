@@ -27,7 +27,7 @@ class Server(
 
         if (r.get<String>("uuid") == UUID(0, 0).toString() && r.get<String>("type") == "GLOBAL") {
             w.set("uuid", UUID.randomUUID().toString())
-            w.set("uuid", "HUB")
+            w.set("type", "HUB")
 
             w.save()
         }

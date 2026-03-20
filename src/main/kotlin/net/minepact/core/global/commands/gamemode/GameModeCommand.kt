@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands.gamemode
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -12,6 +11,7 @@ import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerType
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import net.minepact.api.command.Command
 
 class GameModeCommand : Command(
     server = ServerType.SURVIVAL,
@@ -20,7 +20,7 @@ class GameModeCommand : Command(
     usage = CommandUsage(
         label = "gamemode",
         arguments = listOf(
-            ExpectedArgument(name = "gamemode", dynamicProvider = Provider.GAMEMODES,),
+            ExpectedArgument(name = "gamemode", dynamicProvider = Provider.GAMEMODES),
             ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS, optional = true),
         )
     ),

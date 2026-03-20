@@ -1,7 +1,6 @@
 package net.minepact.core.global.commands.staff.punishment
 
 import net.minepact.Main
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -9,6 +8,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.discord.Webhooks.PUNISHMENTS_WEBHOOK
 import net.minepact.api.messages.send
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
@@ -24,6 +24,7 @@ import net.minepact.core.global.commands.staff.punishment.helper.resolveAnnounce
 import net.minepact.core.global.commands.staff.punishment.helper.retrieveModifiers
 import net.minepact.core.global.commands.staff.punishment.helper.revertPunishment
 import org.bukkit.Bukkit
+import net.minepact.api.command.Command
 
 class UnIpBanCommand : Command(
     name = "un-ipban",
@@ -61,7 +62,7 @@ class UnIpBanCommand : Command(
                 AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(getRevokalMessage(ban, AnnouncementModifier.PUBLIC)) }
             }
 
-            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(unipbanEmbed(ban, listOf(ScopeModifier.GLOBAL, announcement))))
+            PUNISHMENTS_WEBHOOK.sendMessage("", listOf(unipbanEmbed(ban, listOf(ScopeModifier.GLOBAL, announcement))))
         }
 
         return Result.SUCCESS

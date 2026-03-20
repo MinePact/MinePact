@@ -1,7 +1,6 @@
 package net.minepact.core.global.commands.staff
 
 import net.minepact.Main
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -12,6 +11,7 @@ import net.minepact.api.messages.MessageBuilder
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.permissions.Permission
+import net.minepact.api.command.Command
 
 class StaffChatCommand : Command(
     name = "staffchat",

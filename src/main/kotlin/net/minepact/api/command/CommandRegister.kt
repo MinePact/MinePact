@@ -4,6 +4,7 @@ import net.minepact.Main
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.parseArgument
 import net.minepact.api.data.helper.DataType
+import net.minepact.api.discord.Webhooks.LOGGING_WEBHOOK
 import net.minepact.api.logging.LogInfo
 import net.minepact.api.logging.LogType
 import net.minepact.api.messages.send
@@ -89,7 +90,7 @@ class CommandRegister {
 
                     RAN_COMMANDS[sender] = RAN_COMMANDS.getOrDefault(sender, mutableMapOf())
                         .also { it[command] = System.currentTimeMillis() }
-                    if (command.log) Main.LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}")
+                    if (command.log) LOGGING_WEBHOOK.sendMessage("**${sender.name}** executed the command: /${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}")
 
                     sender.asPlayer().writeLog(LogInfo(
                         serverId = Main.SERVER.info.uuid,

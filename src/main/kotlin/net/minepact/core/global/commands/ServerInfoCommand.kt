@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
@@ -10,6 +9,7 @@ import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
 import net.minepact.api.server.ServerInfo
 import java.util.concurrent.CompletableFuture
+import net.minepact.api.command.Command
 
 class ServerInfoCommand : Command(
     name = "server-info",

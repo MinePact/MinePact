@@ -2,7 +2,6 @@ package net.minepact.core.global.commands.staff.punishment
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -10,6 +9,7 @@ import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.command.arguments.ExpectedArgument
 import net.minepact.api.data.repository.PunishmentRepository
+import net.minepact.api.discord.Webhooks.PUNISHMENTS_WEBHOOK
 import net.minepact.api.messages.send
 import net.minepact.api.misc.formatDate
 import net.minepact.api.player.PlayerRegistry
@@ -32,6 +32,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerKickEvent
 import kotlin.String
+import net.minepact.api.command.Command
 
 class IpBanCommand : Command(
     name = "ipban",
@@ -59,7 +60,6 @@ class IpBanCommand : Command(
     ): Result {
         val targetName: String = args[0].value as String
         val target: net.minepact.api.player.Player = PlayerRegistry.get(targetName).get()
-
 
         val rawTokens: MutableList<String> = extractRawTokens(args)
         val modifiers = retrieveModifiers(rawTokens)
@@ -101,7 +101,7 @@ class IpBanCommand : Command(
                 AnnouncementModifier.SILENT -> Bukkit.getOnlinePlayers().forEach { if (it.hasPermission("minepact.punish.notify")) it.send(broadcastMessage) }
             }
 
-            Main.PUNISHMENTS_WEBHOOK.sendMessage("", listOf(ipbanEmbed(punishment, listOf(scope, announcement))))
+            PUNISHMENTS_WEBHOOK.sendMessage("", listOf(ipbanEmbed(punishment, listOf(scope, announcement))))
         }
 
         return Result.SUCCESS

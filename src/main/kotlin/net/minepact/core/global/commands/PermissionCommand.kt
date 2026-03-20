@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
@@ -16,6 +15,7 @@ import kotlin.collections.getOrNull
 import kotlin.let
 import kotlin.text.lowercase
 import kotlin.text.toInt
+import net.minepact.api.command.Command
 
 class PermissionCommand : Command(
     name = "permission",
