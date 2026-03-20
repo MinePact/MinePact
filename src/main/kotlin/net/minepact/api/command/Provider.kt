@@ -1,6 +1,7 @@
 package net.minepact.api.command
 
 import net.minepact.api.config.experimental.ConfigurationRegistry
+import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
 import net.minepact.api.server.ServerType
@@ -18,12 +19,10 @@ class Provider {
     companion object {
         val EMPTY: (CommandSender) -> List<String> = { _ -> emptyList() }
 
-        val PLAYERS: (CommandSender) -> List<String> = { sender -> sender.server.onlinePlayers.map { it.name } }
+        val PLAYERS: (CommandSender) -> List<String> = { _ -> PlayerRegistry.online().map { it.data.name } }
         val WORLDS: (CommandSender) -> List<String> = { sender -> sender.server.worlds.map { it.name } }
         val SERVERS: (CommandSender) -> List<String> = { _ -> ServerType.entries.map { it.name.lowercase() } }
-        val GAMEMODES: (CommandSender) -> List<String> = { sender -> GameMode.entries.map { it.name.lowercase() }.filter { mode ->
-            sender.hasPermission("minepact.gamemode.$mode")
-        } }
+        val GAMEMODES: (CommandSender) -> List<String> = { _ -> GameMode.entries.map { it.name.lowercase() } }
 
         val PUNISHMENT_MODIFIERS: (CommandSender) -> List<String> = { _ -> ScopeModifier.entries.map { it.possibleIdentifiers.map { v -> v } }.flatten() + AnnouncementModifier.entries.map { it.possibleIdentifiers.map { v -> v } }.flatten() }
         val CONFIG_ACTIONS: (CommandSender) -> List<String> = { _ -> listOf("get", "set", "reload") }

@@ -1,47 +1,49 @@
 package net.minepact.core.global.commands.gamemode
 
-import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
-import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.messages.send
 import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
-import net.minepact.api.command.Command
+import net.minepact.api.command.arguments.ArgumentInputType
+import net.minepact.api.command.dsl.Command
 
-class AdventureCommand : Command(
-    name = "adventure",
-    aliases = mutableListOf("gma", "gmadventure", "gamemodeadventure"),
-    description = "Creates a player's game as a game for adventure.",
-    permission = Permission("minepact.gamemode.adventure"),
-    playerOnly = true,
-    usage = CommandUsage(
-        label = "adventure", arguments = listOf(
-            ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS, optional = true)
-        )
-    ),
-) {
-    override fun execute(
-        sender: Player,
-        args: MutableList<Argument<*>>
-    ): Result {
-        try {
-            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.data.name
-            val target = Bukkit.getPlayerExact(targetName)!!
-            target.gameMode = GameMode.ADVENTURE
+class AdventureCommand : Command() {
+    init {
+        val gm = GameMode.ADVENTURE
+        command(gm.name.lowercase()) {
+            description = "Turns the players gamemode to ${gm.name.lowercase()}."
+            permission = Permission("minepact.gamemode.${gm.name.lowercase()}")
+            aliases = mutableListOf("gm${gm.name.lowercase()[0]}")
+            playerOnly = true
 
-            if (sender.asPlayer() == target) sender.sendMessage("<green>You are now in <yellow>adventure <green>mode.")
-            else {
-                sender.sendMessage("<green>${target.name} is now in <yellow>adventure <green>mode.")
-                target.sendMessage("<green>You are now in <yellow>adventure <green>mode.")
+            executes { sender, _ ->
+                if (sender.asPlayer()!!.gameMode == gm) {
+                    sender.sendMessage("<red>You are already in <yellow>${gm.name.lowercase()} <red>mode.")
+                    return@executes Result.SUCCESS
+                }
+                sender.asPlayer()!!.gameMode = gm
+                sender.sendMessage("<green>You are now in <yellow>${gm.name.lowercase()} <green>mode.")
+                Result.SUCCESS
             }
-            return Result.SUCCESS
-        }catch (e: NullPointerException) {
-            sender.sendMessage("<red>Player not found.")
-            return Result.FAILURE
+
+            argument(
+                name = "player",
+                inputType = ArgumentInputType.PLAYER,
+                dynamicProvider = Provider.PLAYERS,
+                permission = Permission("minepact.gamemode.${gm.name.lowercase()}.others"),
+                optional = true
+            ) { executes { player, args ->
+                val target = args[0].value as Player
+                if (target.asPlayer()!!.gameMode == gm) {
+                    player.sendMessage("<red>${target.data.name} is already in <yellow>${gm.name.lowercase()} <red>mode.")
+                    return@executes Result.SUCCESS
+                }
+                target.asPlayer()!!.gameMode = gm
+                if (player != target) player.sendMessage("<green>${target.data.name} is now in <yellow>${gm.name.lowercase()} <green>mode.")
+                target.sendMessage("<green>You are now in <yellow>${gm.name.lowercase()} <green>mode.")
+                Result.SUCCESS
+            } }
         }
     }
 }

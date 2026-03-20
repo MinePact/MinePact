@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender
 @CommandDsl
 class CommandBuilder(private val name: String) {
     var description: String = ""
-    var permission: Permission = Permission("")
+    var permission: Permission? = null
     var playerOnly: Boolean = false
     var cooldown: Double = -1.0
     var log: Boolean = false
@@ -83,7 +83,7 @@ class CommandBuilder(private val name: String) {
         name = name,
         type = CommandNode.Type.LITERAL,
         description = description,
-        permission = permission,
+        permission = permission?.takeIf { it.node.isNotEmpty() },
         playerOnly = playerOnly,
         cooldown = cooldown,
         log = log,

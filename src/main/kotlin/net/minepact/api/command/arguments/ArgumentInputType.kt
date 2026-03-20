@@ -1,6 +1,7 @@
 package net.minepact.api.command.arguments
 
 import net.minepact.api.player.PlayerRegistry
+import org.bukkit.GameMode
 
 /**
  * Represents the type of input expected for a command argument.
@@ -13,7 +14,8 @@ enum class ArgumentInputType {
     DOUBLE,
     FLOAT,
     LONG,
-    PLAYER;
+    PLAYER,
+    GAMEMODE;
 
     fun parse(input: String): Any? = try {
         when (this) {
@@ -28,6 +30,7 @@ enum class ArgumentInputType {
                 else -> null
             }
             PLAYER -> PlayerRegistry.get(input).get()
+            GAMEMODE -> GameMode.valueOf(input.uppercase())
         }
     } catch (e: Exception) {
         null

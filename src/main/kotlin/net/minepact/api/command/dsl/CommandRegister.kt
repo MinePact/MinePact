@@ -38,7 +38,8 @@ class CommandRegister {
             root.aliases
         ) {
             override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
-                if (!sender.asPlayer().hasPermission(root.permission!!)
+                if (root.permission != null
+                    && !sender.asPlayer().hasPermission(root.permission)
                     && !sender.hasPermission("minepact.command.bypass")
                     && !sender.isOp
                     && sender !is ConsoleCommandSender
@@ -69,7 +70,7 @@ class CommandRegister {
                 val result = dispatch(sender, root, args, 0, parsedArgs)
 
                 if (result == null) {
-                    sender.send("<red>Usage:\n${command.buildUsage(args)}")
+                    sender.send("<red>Usage: ${command.buildUsage(args)}")
                     return true
                 }
 
@@ -112,7 +113,6 @@ class CommandRegister {
         parsedArgs: MutableList<Argument<*>>
     ): Result? {
         if (index >= args.size) {
-            // Check playerOnly at execution time, not just traversal time
             if (node.playerOnly && sender !is Player) {
                 sender.send("<red>This can only be used by players.")
                 return Result.FAILURE
@@ -135,7 +135,6 @@ class CommandRegister {
                     sender.send("<red>You do not have permission to execute this subcommand.")
                     return Result.FAILURE
                 }
-                // playerOnly on literals is still checked at traversal for early rejection
                 if (literalChild.playerOnly && sender !is Player) {
                     sender.send("<red>This subcommand can only be used by players.")
                     return Result.FAILURE
@@ -147,7 +146,13 @@ class CommandRegister {
             .firstOrNull { it.type == CommandNode.Type.ARGUMENT }
             ?.let { argChild ->
                 val exp = argChild.argument!!
-                if (exp.permission != null && !sender.hasPermission(exp.permission)) return null
+                if (exp.permission != null
+                    && exp.permission.isNotEmpty()
+                    && !sender.hasPermission(exp.permission)
+                    && !sender.hasPermission("minepact.command.bypass")
+                    && !sender.isOp
+                    && sender !is ConsoleCommandSender
+                ) return null
                 if (exp.senderFilter?.invoke(sender) == false) return null
 
                 val parsed = parseArgument(current, exp)
@@ -194,8 +199,12 @@ class CommandRegister {
                 .filter { it.type == CommandNode.Type.ARGUMENT }
                 .forEach { child ->
                     val exp = child.argument!!
-                    if (exp.permission != null && !sender.hasPermission(exp.permission)) return@forEach
-                    if (exp.senderFilter?.invoke(sender) == false) return@forEach
+                    if (exp.permission != null
+                        && exp.permission.isNotEmpty()
+                        && !sender.hasPermission(exp.permission)
+                        && !sender.hasPermission("minepact.command.bypass")
+                        && !sender.isOp
+                    ) return@forEach
                     val values = exp.dynamicProvider?.invoke(sender)
                         ?: exp.potentialValues
                         ?: return@forEach

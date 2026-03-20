@@ -1,8 +1,7 @@
 package net.minepact.api.reflections
 
 import net.minepact.Main
-import net.minepact.api.command.Command
-import org.bukkit.plugin.java.JavaPlugin
+import net.minepact.api.command.dsl.Command
 import java.io.File
 import java.lang.reflect.Modifier
 import java.util.jar.JarFile

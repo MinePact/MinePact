@@ -1,6 +1,6 @@
 package net.minepact
 
-import net.minepact.api.command.CommandRegister
+import net.minepact.api.command.dsl.CommandRegister
 import net.minepact.api.config.custom.ConfigManager
 import net.minepact.api.config.custom.helper.*
 import net.minepact.api.data.*
@@ -56,8 +56,6 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         SERVER = Server()
 
         findCommands("net.minepact.core").forEach { COMMAND_REGISTRY.register(it) }
-        net.minepact.api.command.dsl.CommandRegister().register(TestCommand())
-        net.minepact.api.command.dsl.CommandRegister().register(CreativeCommand())
         findEvents("net.minepact").forEach { EVENT_REGISTRY.register(it) }
         registerConfigs("net.minepact.core.global.configs")
 
