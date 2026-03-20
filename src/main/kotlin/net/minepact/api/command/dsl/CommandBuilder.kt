@@ -54,6 +54,21 @@ class CommandBuilder(private val name: String) {
             )
         )
     }
+    fun argument(
+        expected: ExpectedArgument,
+        block: CommandBuilder.() -> Unit = {}
+    ) {
+        val child = CommandBuilder(name).apply(block)
+        children.add(
+            CommandNode(
+                name = name,
+                type = CommandNode.Type.ARGUMENT,
+                argument = expected,
+                children = child.children.toList(),
+                executor = child.executor
+            )
+        )
+    }
 
     fun subcommand(
         name: String,

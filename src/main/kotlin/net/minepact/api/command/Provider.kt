@@ -1,6 +1,7 @@
 package net.minepact.api.command
 
 import net.minepact.api.config.experimental.ConfigurationRegistry
+import net.minepact.api.permissions.GroupRegistry
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.punishment.modifier.AnnouncementModifier
 import net.minepact.api.punishment.modifier.ScopeModifier
@@ -20,6 +21,7 @@ class Provider {
         val EMPTY: (CommandSender) -> List<String> = { _ -> emptyList() }
 
         val PLAYERS: (CommandSender) -> List<String> = { _ -> PlayerRegistry.online().map { it.data.name } }
+        val GROUPS: (CommandSender) -> List<String> = { _ -> GroupRegistry.all().map { it.name } }
         val WORLDS: (CommandSender) -> List<String> = { sender -> sender.server.worlds.map { it.name } }
         val SERVERS: (CommandSender) -> List<String> = { _ -> ServerType.entries.map { it.name.lowercase() } }
         val GAMEMODES: (CommandSender) -> List<String> = { _ -> GameMode.entries.map { it.name.lowercase() } }

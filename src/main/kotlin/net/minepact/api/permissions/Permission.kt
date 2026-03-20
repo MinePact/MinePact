@@ -25,5 +25,8 @@ data class Permission(
     }
 
     fun isTemporary(): Boolean = expiresAt != null
+    fun toInfoString(): String {
+        return "<white>${node} <gray>[${if (value) "true" else "false"}${expiresAt?.let { t -> ", expires at $t" } ?: ""}]"
+    }
     override fun toString(): String = "[$node,$value,$expiresAt]"
 }

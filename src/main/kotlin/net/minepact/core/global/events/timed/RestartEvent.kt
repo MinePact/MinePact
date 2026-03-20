@@ -21,7 +21,6 @@ class RestartEvent(
         if (cancelled) return
 
         remainingTime = waitPeriod.coerceAtMost(TimeInterval.HOUR)
-
         task = Bukkit.getScheduler().runTaskTimer(Main.instance, Runnable {
             if (cancelled) {
                 task?.cancel()
@@ -55,7 +54,7 @@ class RestartEvent(
             time >= TimeInterval.MINUTE * 15 -> time % (TimeInterval.MINUTE * 15) == 0L
             time >= TimeInterval.MINUTE * 5 -> time % (TimeInterval.MINUTE * 5) == 0L
             time >= TimeInterval.MINUTE -> time % TimeInterval.MINUTE == 0L
-            time <= TimeInterval.SECOND * 5 -> true // last 5 seconds
+            time <= TimeInterval.SECOND * 5 -> true
             else -> false
         }
     }

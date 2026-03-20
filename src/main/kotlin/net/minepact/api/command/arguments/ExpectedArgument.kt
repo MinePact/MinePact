@@ -16,7 +16,7 @@ import org.bukkit.command.CommandSender
  *
  * @author dankenyon - 22/02/26
  */
-class ExpectedArgument(
+open class ExpectedArgument(
     val name: String,
     var potentialValues: List<String>? = null,
     var inputType: ArgumentInputType = ArgumentInputType.STRING,

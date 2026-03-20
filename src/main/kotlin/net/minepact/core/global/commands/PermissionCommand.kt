@@ -46,15 +46,15 @@ class PermissionCommand : Command(
         // /perm group create <name>
         // /perm group delete <name>
         // /perm group info <name>
-        // /perm group modify <group> perm add <permission> [true|false] [duration]
-        // /perm group modify <group> perm rem <permission> [true|false] [duration]
-        // /perm group modify <group> perm edit <permission> [true|false] [duration]
-        // /perm group modify <group> parent add <group>
-        // /perm group modify <group> parent rem <group>
-        // /perm group modify <group> set display <new_name>
-        // /perm group modify <group> set weight <new_name>
-        // /perm group modify <group> set prefix <new_name>
-        // /perm group modify <group> set suffix <suffix>
+        // /perm group <group> perm add <permission> [true|false] [duration]
+        // /perm group <group> perm rem <permission> [true|false] [duration]
+        // /perm group <group> perm edit <permission> [true|false] [duration]
+        // /perm group <group> parent add <group>
+        // /perm group <group> parent rem <group>
+        // /perm group <group> set display <new_name>
+        // /perm group <group> set weight <new_name>
+        // /perm group <group> set prefix <new_name>
+        // /perm group <group> set suffix <suffix>
 
         val name = args[2].value as String
         when (args[1].value as String) {

@@ -1,5 +1,6 @@
 package net.minepact.api.command.arguments
 
+import net.minepact.api.permissions.GroupRegistry
 import net.minepact.api.player.PlayerRegistry
 import org.bukkit.GameMode
 
@@ -15,7 +16,8 @@ enum class ArgumentInputType {
     FLOAT,
     LONG,
     PLAYER,
-    GAMEMODE;
+    GAMEMODE,
+    GROUP;
 
     fun parse(input: String): Any? = try {
         when (this) {
@@ -29,8 +31,9 @@ enum class ArgumentInputType {
                 input.equals("false", true) -> false
                 else -> null
             }
-            PLAYER -> PlayerRegistry.get(input).get()
+            PLAYER -> PlayerRegistry.get(input.lowercase()).get()
             GAMEMODE -> GameMode.valueOf(input.uppercase())
+            GROUP -> GroupRegistry.get(input.lowercase()).get()
         }
     } catch (e: Exception) {
         null
