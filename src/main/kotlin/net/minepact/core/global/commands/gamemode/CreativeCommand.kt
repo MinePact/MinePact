@@ -1,47 +1,51 @@
 package net.minepact.core.global.commands.gamemode
 
-import net.minepact.api.command.Command
-import net.minepact.api.command.CommandUsage
+import net.minepact.api.command.dsl.Command
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
-import net.minepact.api.command.arguments.Argument
-import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.messages.send
-import net.minepact.api.player.Player
+import net.minepact.api.command.arguments.ArgumentInputType
 import net.minepact.api.permissions.Permission
-import org.bukkit.Bukkit
+import net.minepact.api.player.Player
 import org.bukkit.GameMode
 
-class CreativeCommand : Command(
-    name = "creative",
-    aliases = mutableListOf("gmc", "gmcreative", "gamemodecreative"),
-    description = "Creates a player's game as a game for creative.",
-    permission = Permission("minepact.gamemode.creative"),
-    playerOnly = true,
-    usage = CommandUsage(
-        label = "creative", arguments = listOf(
-            ExpectedArgument(name = "player", dynamicProvider = Provider.PLAYERS, optional = true)
-        )
-    ),
-) {
-    override fun execute(
-        sender: Player,
-        args: MutableList<Argument<*>>
-    ): Result {
-        try {
-            val targetName = if (args.isNotEmpty()) args[0].value as String else sender.data.name
-            val target = Bukkit.getPlayerExact(targetName)!!
-            target.gameMode = GameMode.CREATIVE
+class CreativeCommand : Command() {
+    init {
+        command("creative") {
+            description = "Test a command"
+            permission = Permission("minepact.gamemode.creative")
+            aliases = mutableListOf("gmc")
+            playerOnly = true
 
-            if (sender.asPlayer() == target) sender.sendMessage("<green>You are now in <yellow>creative <green>mode.")
-            else {
-                sender.sendMessage("<green>${target.name} is now in <yellow>creative <green>mode.")
-                target.sendMessage("<green>You are now in <yellow>creative <green>mode.")
+            executes { sender, _ ->
+                if (sender.asPlayer()!!.gameMode == GameMode.CREATIVE) {
+                    sender.sendMessage("<red>You are already in <yellow>creative <red>mode.")
+                    Result.SUCCESS
+                }
+                sender.asPlayer()!!.gameMode = GameMode.CREATIVE
+                sender.sendMessage("<green>You are now in <yellow>creative <green>mode.")
+                Result.SUCCESS
             }
-            return Result.SUCCESS
-        }catch (e: NullPointerException) {
-            sender.sendMessage("<red>Player not found.")
-            return Result.FAILURE
+
+            argument(
+                name = "player",
+                inputType = ArgumentInputType.PLAYER,
+                dynamicProvider = Provider.PLAYERS,
+                permission = Permission("minepact.gamemode.creative.others")
+            ) {
+                playerOnly = false
+
+                executes { player, args ->
+                    val target = args[0].value as Player
+                    if (target.asPlayer()!!.gameMode == GameMode.CREATIVE) {
+                        player.sendMessage("<red>${target.data.name} is already in <yellow>creative <red>mode.")
+                        Result.SUCCESS
+                    }
+                    target.asPlayer()!!.gameMode = GameMode.CREATIVE
+                    if (player != target) player.sendMessage("<green>${target.data.name} is now in <yellow>creative <green>mode.")
+                    target.sendMessage("<green>You are now in <yellow>creative <green>mode.")
+                    Result.SUCCESS
+                }
+            }
         }
     }
 }

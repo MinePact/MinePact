@@ -13,6 +13,8 @@ import net.minepact.api.reflections.*
 import net.minepact.api.scheduler.EventScheduler
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.*
+import net.minepact.core.global.commands.TestCommand
+import net.minepact.core.global.commands.gamemode.CreativeCommand
 import net.minepact.core.global.events.timed.*
 import kotlin.properties.Delegates
 
@@ -44,7 +46,7 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
             type = DatabaseProvider.valueOf(reader.get<String>("database.provider")),
             host = reader.get<String>("database.host"),
             port = reader.get<Int>("database.port"),
-            database = reader.get<String>("database.database"),
+            database = reader.get<String>("database.name"),
             username = reader.get<String>("database.username"),
             password = reader.get<String>("database.password")
         )
@@ -54,6 +56,8 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
         SERVER = Server()
 
         findCommands("net.minepact.core").forEach { COMMAND_REGISTRY.register(it) }
+        net.minepact.api.command.dsl.CommandRegister().register(TestCommand())
+        net.minepact.api.command.dsl.CommandRegister().register(CreativeCommand())
         findEvents("net.minepact").forEach { EVENT_REGISTRY.register(it) }
         registerConfigs("net.minepact.core.global.configs")
 

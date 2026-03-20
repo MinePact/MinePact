@@ -1,7 +1,6 @@
 package net.minepact.core.global.commands.staff.punishment
 
 import net.minepact.Main
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -25,6 +24,7 @@ import net.minepact.core.global.commands.staff.punishment.helper.resolveAnnounce
 import net.minepact.core.global.commands.staff.punishment.helper.retrieveModifiers
 import net.minepact.core.global.commands.staff.punishment.helper.revertPunishment
 import org.bukkit.Bukkit
+import net.minepact.api.command.Command
 
 class UnmuteCommand : Command(
     name = "unmute",

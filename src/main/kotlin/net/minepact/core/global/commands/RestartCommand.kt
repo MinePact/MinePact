@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
@@ -9,6 +8,7 @@ import net.minepact.api.player.Player
 import net.minepact.api.permissions.Permission
 import net.minepact.api.scheduler.EventScheduler
 import net.minepact.core.global.events.timed.RestartEvent
+import net.minepact.api.command.Command
 
 class RestartCommand : Command(
     name = "restart",

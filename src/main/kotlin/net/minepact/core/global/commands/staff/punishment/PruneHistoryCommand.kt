@@ -1,6 +1,5 @@
 package net.minepact.core.global.commands.staff.punishment
 
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -13,6 +12,7 @@ import net.minepact.api.misc.getLengthFromIdentifier
 import net.minepact.api.player.Player
 import net.minepact.api.player.PlayerRegistry
 import net.minepact.api.permissions.Permission
+import net.minepact.api.command.Command
 
 class PruneHistoryCommand : Command(
     name = "prune",

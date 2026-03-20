@@ -12,9 +12,7 @@ class MotdEvent : TimedEvent(
     interval = TimeInterval.SECOND * 5
 ) {
     override fun run() {
-        val config: MotdConfig = ConfigurationRegistry.get(MotdConfig::class)
-
-        if (Main.SERVER.maintenanceMode()) Bukkit.getServer().motd(FormatParser.parse(config.maintenance))
-        else Bukkit.getServer().motd(FormatParser.parse(config.motd))
+        if (Main.SERVER.maintenanceMode()) Bukkit.getServer().motd(FormatParser.parse(""))
+        else Bukkit.getServer().motd(FormatParser.parse(""))
     }
 }

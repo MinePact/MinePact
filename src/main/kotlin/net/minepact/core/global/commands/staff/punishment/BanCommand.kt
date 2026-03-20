@@ -2,7 +2,6 @@ package net.minepact.core.global.commands.staff.punishment
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minepact.Main
-import net.minepact.api.command.Command
 import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Provider
 import net.minepact.api.command.Result
@@ -33,6 +32,7 @@ import net.minepact.core.global.commands.staff.punishment.helper.revertPunishmen
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerKickEvent
 import kotlin.String
+import net.minepact.api.command.Command
 
 class BanCommand : Command(
     name = "ban",

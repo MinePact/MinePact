@@ -1,5 +1,7 @@
 package net.minepact.api.command.arguments
 
+import net.minepact.api.player.PlayerRegistry
+
 /**
  * Represents the type of input expected for a command argument.
  * @author dankenyon - 22/02/26
@@ -10,7 +12,8 @@ enum class ArgumentInputType {
     BOOLEAN,
     DOUBLE,
     FLOAT,
-    LONG;
+    LONG,
+    PLAYER;
 
     fun parse(input: String): Any? = try {
         when (this) {
@@ -24,6 +27,7 @@ enum class ArgumentInputType {
                 input.equals("false", true) -> false
                 else -> null
             }
+            PLAYER -> PlayerRegistry.get(input).get()
         }
     } catch (e: Exception) {
         null
