@@ -1,4 +1,6 @@
-package net.minepact.api.permissions
+package net.minepact.api.permissions.repository
+
+import net.minepact.api.permissions.Permission
 
 import java.util.UUID
 

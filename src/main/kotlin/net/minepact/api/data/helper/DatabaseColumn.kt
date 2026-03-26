@@ -10,7 +10,7 @@ class DatabaseColumn(
 ) {
     override fun toString(): String {
         val constraints = mutableListOf<String>()
-        if (isPrimaryKey) constraints.add("PRIMARY KEY")
+        // PRIMARY KEY is intentionally handled at the table level to allow composite keys
         if (isAutoIncrement) constraints.add("AUTO_INCREMENT")
         if (!isNullable) constraints.add("NOT NULL")
         if (defaultValue != null) constraints.add("DEFAULT $defaultValue")

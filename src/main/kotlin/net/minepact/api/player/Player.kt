@@ -8,8 +8,8 @@ import net.minepact.Main
 import net.minepact.api.data.repository.LogRepository
 import net.minepact.api.data.repository.PunishmentRepository
 import net.minepact.api.data.repository.ServerRepository
-import net.minepact.api.economy.EconomyHolder
 import net.minepact.api.logging.LogInfo
+import net.minepact.api.logging.LogType
 import net.minepact.api.math.helper.vector.vec
 import net.minepact.api.messages.FormatParser
 import net.minepact.api.messages.Message
@@ -20,8 +20,8 @@ import net.minepact.api.permissions.PermissionCache
 import net.minepact.api.permissions.PermissionManager
 import net.minepact.api.permissions.PermissionPersistence
 import net.minepact.api.permissions.PermissionScope
-import net.minepact.api.permissions.PlayerGroupData
-import net.minepact.api.permissions.PlayerPermissionData
+import net.minepact.api.permissions.repository.PlayerGroupData
+import net.minepact.api.permissions.repository.PlayerPermissionData
 import net.minepact.api.punishment.Punishment
 import net.minepact.api.punishment.PunishmentType
 import net.minepact.api.world.Position
@@ -182,6 +182,17 @@ class Player(
     fun writeLog(log: LogInfo): File {
         val file = logFile()
         file.appendText(log.toString() + System.lineSeparator())
+        return file
+    }
+    fun writeLog(type: LogType, content: String, flag: Boolean = false): File {
+        val file = logFile()
+        file.appendText(LogInfo(
+            serverId = Main.SERVER.info.uuid,
+            senderId = data.uuid,
+            type = type,
+            content = content,
+            suspicious = flag
+        ).toString() + System.lineSeparator())
         return file
     }
     fun currentLogs(): List<LogInfo> {
@@ -359,6 +370,8 @@ class Player(
         localPermissionData.perms.add(permission)
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_ADD, "${permission.node}}")
     }
     override fun addTemporaryPermission(permission: Permission, duration: Duration) {
         addTemporaryPermission(permission, duration, PermissionScope.LOCAL)
@@ -399,6 +412,8 @@ class Player(
         }
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_ADD, "${permission.node}}")
     }
     fun addTemporaryPermission(permission: Permission, duration: Duration, scope: PermissionScope = PermissionScope.LOCAL) {
         val temp = permission.copy(expiresAt = Instant.now().plus(duration))
@@ -410,6 +425,8 @@ class Player(
 
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_ADD_TEMP, "${permission.node}}")
     }
     fun removePermission(permission: Permission, scope: PermissionScope = PermissionScope.ALL) {
         removePermission(permission.node, scope)
@@ -429,6 +446,8 @@ class Player(
         }
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_ADD, "$node}")
     }
     fun addTemporaryPermission(node: String, duration: Duration, scope: PermissionScope = PermissionScope.LOCAL) {
         val temp = Permission(node).copy(expiresAt = Instant.now().plus(duration))
@@ -440,6 +459,8 @@ class Player(
 
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_ADD_TEMP, "$node}")
     }
     fun removePermission(node: String, scope: PermissionScope = PermissionScope.ALL) {
         when (scope) {
@@ -453,6 +474,8 @@ class Player(
 
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.PERMISSION_REMOVE, node)
     }
 
     fun getPrimaryGroup(): Group? {
@@ -462,6 +485,8 @@ class Player(
         localGroupData.groups.add(group)
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.GROUP_ADD, group.name)
     }
     override fun removeGroup(group: Group) {
         removeGroup(group, PermissionScope.LOCAL)
@@ -488,6 +513,8 @@ class Player(
 
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.GROUP_ADD, group.name)
     }
     fun removeGroup(group: Group, scope: PermissionScope = PermissionScope.ALL) {
         when (scope) {
@@ -501,6 +528,8 @@ class Player(
 
         PermissionCache.invalidate(data.uuid)
         PermissionPersistence.markDirty(this)
+
+        writeLog(LogType.GROUP_REMOVE, group.name)
     }
     fun getGroups(scope: PermissionScope = PermissionScope.ALL): Set<Group> {
         return when (scope) {

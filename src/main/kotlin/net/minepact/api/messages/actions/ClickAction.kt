@@ -6,4 +6,5 @@ sealed interface ClickAction {
     data class OpenUrl(override val value: String) : ClickAction
     data class RunCommand(override val value: String) : ClickAction
     data class SuggestCommand(override val value: String) : ClickAction
+    data class Copy(override val value: String) : ClickAction
 }

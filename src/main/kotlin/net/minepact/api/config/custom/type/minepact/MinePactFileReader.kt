@@ -7,10 +7,24 @@ import net.minepact.api.config.custom.exception.ConfigKeyNotFoundException
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-class MinePactFileReader(private val data: Map<String, ConfigValue>) : FileReader {
+class MinePactFileReader(private val data: MutableMap<String, ConfigValue>) : FileReader {
     @Suppress("UNCHECKED_CAST")
     override fun <T> get(path: String, type: KType): T {
-        val value = data[path] ?: throw ConfigKeyNotFoundException(path)
+        val value = data[path] ?: run {
+            val cls = type.classifier as? KClass<*>
+            val default: ConfigValue = when (cls) {
+                String::class -> ConfigValue.StringValue("")
+                Int::class -> ConfigValue.IntValue(0)
+                Double::class -> ConfigValue.DoubleValue(0.0)
+                Float::class -> ConfigValue.FloatValue(0f)
+                Boolean::class -> ConfigValue.BoolValue(false)
+                List::class -> ConfigValue.ListValue(emptyList())
+                Map::class -> ConfigValue.MapValue(emptyList())
+                else -> throw ConfigKeyNotFoundException(path)
+            }
+            data[path] = default
+            default
+        }
 
         return when (val cls = type.classifier as? KClass<*>) {
             String::class -> value.asString() as T
@@ -21,7 +35,7 @@ class MinePactFileReader(private val data: Map<String, ConfigValue>) : FileReade
 
             List::class -> {
                 val elementType = type.arguments.firstOrNull()?.type
-                    ?: throw ConfigException("get<List<T>> requires a type argument, e.g. get<List<Int>>(\"$path\")")
+                    ?: throw ConfigException("get<List<T>> requires a type argument, e.g. get<List<Int>(\"$path\")")
                 value.asList(path, elementType) as T
             }
 

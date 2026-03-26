@@ -96,7 +96,7 @@ class CommandRegister {
                         serverId = Main.SERVER.info.uuid,
                         senderId = (sender as? Player)?.uniqueId ?: UUID(0, 0),
                         type = LogType.COMMAND,
-                        timestamp =System.currentTimeMillis(),
+                        timestamp = System.currentTimeMillis(),
                         content = "/${command.name} ${parsedArgs.joinToString(" ") { it.value.toString() }}",
                         suspicious = command.log
                     ))

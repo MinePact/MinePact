@@ -33,6 +33,7 @@ data class Message(
                     is ClickAction.OpenUrl -> ClickEvent.openUrl(action.value)
                     is ClickAction.RunCommand -> ClickEvent.runCommand(action.value)
                     is ClickAction.SuggestCommand -> ClickEvent.suggestCommand(action.value)
+                    is ClickAction.Copy -> ClickEvent.copyToClipboard(action.value)
                 }
                 comp = comp.clickEvent(clickEvent)
             }

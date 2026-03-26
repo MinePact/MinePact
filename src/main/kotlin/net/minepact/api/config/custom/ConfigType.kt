@@ -14,14 +14,14 @@ sealed class ConfigType {
     abstract val fileExtension: String
 
     abstract fun createParser(): FileParser
-    abstract fun createReader(data: Map<String, ConfigValue>): FileReader
+    abstract fun createReader(data: MutableMap<String, ConfigValue>): FileReader
     abstract fun createWriter(data: MutableMap<String, ConfigValue>, file: File): FileWriter
 
     object MinePact : ConfigType() {
         override val formatName = "mpc"
         override val fileExtension = "mpc"
         override fun createParser() = MinePactFileParser()
-        override fun createReader(data: Map<String, ConfigValue>): FileReader = MinePactFileReader(data)
+        override fun createReader(data: MutableMap<String, ConfigValue>): FileReader = MinePactFileReader(data)
         override fun createWriter(data: MutableMap<String, ConfigValue>, file: File): FileWriter =
             MinePactFileWriter(data, file)
     }
@@ -29,7 +29,7 @@ sealed class ConfigType {
         override val formatName = "json"
         override val fileExtension = "json"
         override fun createParser() = notImplemented()
-        override fun createReader(data: Map<String, ConfigValue>): FileReader = notImplemented()
+        override fun createReader(data: MutableMap<String, ConfigValue>): FileReader = notImplemented()
         override fun createWriter(data: MutableMap<String, ConfigValue>, file: File): FileWriter = notImplemented()
         private fun notImplemented(): Nothing = throw ConfigException("JSON config format is not yet implemented")
     }
@@ -37,7 +37,7 @@ sealed class ConfigType {
         override val formatName = "yaml"
         override val fileExtension = "yaml"
         override fun createParser() = notImplemented()
-        override fun createReader(data: Map<String, ConfigValue>): FileReader = notImplemented()
+        override fun createReader(data: MutableMap<String, ConfigValue>): FileReader = notImplemented()
         override fun createWriter(data: MutableMap<String, ConfigValue>, file: File): FileWriter = notImplemented()
         private fun notImplemented(): Nothing = throw ConfigException("YAML config format is not yet implemented")
     }

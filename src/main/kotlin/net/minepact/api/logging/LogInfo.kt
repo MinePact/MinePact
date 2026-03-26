@@ -6,7 +6,7 @@ data class LogInfo(
     val serverId: UUID,
     val senderId: UUID,
     val type: LogType,
-    val timestamp: Long,
+    var timestamp: Long = System.currentTimeMillis(),
     val content: String,
     val suspicious: Boolean
 ) {

@@ -4,7 +4,7 @@ import net.minepact.api.command.CommandUsage
 import net.minepact.api.command.Result
 import net.minepact.api.command.arguments.Argument
 import net.minepact.api.command.arguments.ExpectedArgument
-import net.minepact.api.data.repository.GroupRepository
+import net.minepact.api.data.repository.permissions.GroupRepository
 import net.minepact.api.permissions.Group
 import net.minepact.api.permissions.GroupRegistry
 import net.minepact.api.player.Player
@@ -16,7 +16,7 @@ import kotlin.let
 import kotlin.text.lowercase
 import kotlin.text.toInt
 import net.minepact.api.command.Command
-
+/*
 class PermissionCommand : Command(
     name = "permission",
     description = "Manage permissions for players and groups.",
@@ -260,3 +260,5 @@ class PermissionCommand : Command(
         return Result.SUCCESS
     }
 }
+
+ */

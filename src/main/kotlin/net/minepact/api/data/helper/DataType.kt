@@ -1,7 +1,7 @@
 package net.minepact.api.data.helper
 
 enum class DataType(val rep: String) {
-    STRING("VARCHAR(255)"),
+    STRING("VARCHAR(191)"),
     TEXT("TEXT"),
 
     INT("INT"),

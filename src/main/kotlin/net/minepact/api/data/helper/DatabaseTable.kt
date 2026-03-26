@@ -6,6 +6,8 @@ class DatabaseTable(
 ) {
     fun createEnsureScript(): String {
         val columnDefinitions = columns.joinToString(", ") { it.toString() }
-        return "CREATE TABLE IF NOT EXISTS $name ($columnDefinitions);"
+        val pkColumns = columns.filter { it.isPrimaryKey }.map { it.name }
+        val pkClause = if (pkColumns.isNotEmpty()) ", PRIMARY KEY(${pkColumns.joinToString(", ")})" else ""
+        return "CREATE TABLE IF NOT EXISTS $name ($columnDefinitions$pkClause);"
     }
 }

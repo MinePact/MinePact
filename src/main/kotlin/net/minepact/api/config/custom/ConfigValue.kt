@@ -32,7 +32,7 @@ sealed class ConfigValue {
     fun asMap(path: String, keyType: KType, valueType: KType): Map<Any?, Any?> {
         if (this !is MapValue) throw ConfigMapTypeMismatchException(path, "value", "Map", typeName())
 
-        val keyCls = keyType.classifier   as? KClass<*>
+        val keyCls = keyType.classifier as? KClass<*>
         val valCls = valueType.classifier as? KClass<*>
 
         return entries.associate { (rawKey, rawVal) ->

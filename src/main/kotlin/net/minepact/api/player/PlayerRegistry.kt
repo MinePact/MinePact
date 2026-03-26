@@ -1,13 +1,13 @@
 package net.minepact.api.player
 
 import net.minepact.Main
-import net.minepact.api.data.repository.PlayerPermissionStateRepository
+import net.minepact.api.data.repository.permissions.PlayerPermissionStateRepository
 import net.minepact.api.data.repository.PlayerRepository
 import net.minepact.api.permissions.GroupRegistry
 import net.minepact.api.permissions.PermissionCache
 import net.minepact.api.permissions.PermissionScope
-import net.minepact.api.permissions.PlayerGroupData
-import net.minepact.api.permissions.PlayerPermissionData
+import net.minepact.api.permissions.repository.PlayerGroupData
+import net.minepact.api.permissions.repository.PlayerPermissionData
 import net.minepact.api.permissions.graph.PermissionCompiler
 import net.minepact.api.world.Position
 import java.util.UUID
@@ -30,7 +30,7 @@ object PlayerRegistry {
         return PlayerRepository.findByUUID(uuid).thenCompose { data ->
             if (data == null) return@thenCompose CompletableFuture.completedFuture(null)
 
-            PlayerPermissionStateRepository.findAll(uuid, Main.SERVER.info.uuid.toString()).thenApply { states ->
+            PlayerPermissionStateRepository.findAll(uuid, PermissionScope.ALL).thenApply { states ->
                     val globalState = states.firstOrNull { it.serverId == "GLOBAL" }
                     val localState = states.firstOrNull { it.serverId == Main.SERVER.info.uuid.toString() }
 

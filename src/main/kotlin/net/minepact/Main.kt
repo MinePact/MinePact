@@ -13,8 +13,6 @@ import net.minepact.api.reflections.*
 import net.minepact.api.scheduler.EventScheduler
 import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.*
-import net.minepact.core.global.commands.TestCommand
-import net.minepact.core.global.commands.gamemode.CreativeCommand
 import net.minepact.core.global.events.timed.*
 import kotlin.properties.Delegates
 
@@ -75,6 +73,10 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
     }
 
     override fun onDisable() {
+        // Persist permissions immediately during plugin disable to ensure no changes are lost
+        PermissionShutdownHook.persistNow()
+
+        // Also register JVM shutdown hook as a fallback
         PermissionShutdownHook.register()
 
         if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))

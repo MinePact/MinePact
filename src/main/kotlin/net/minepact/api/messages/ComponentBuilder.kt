@@ -27,6 +27,7 @@ class ComponentBuilder(
     fun clickOpenUrl(url: String) = apply { this.clickAction = ClickAction.OpenUrl(url) }
     fun clickRunCommand(cmd: String) = apply { this.clickAction = ClickAction.RunCommand(cmd) }
     fun clickSuggestCommand(cmd: String) = apply { this.clickAction = ClickAction.SuggestCommand(cmd) }
+    fun clickCopy(value: String) = apply { this.clickAction = ClickAction.Copy(value) }
 
     fun hoverText(text: String) = apply { this.hoverAction = HoverAction.ShowText(text) }
     fun hoverText(vararg text: String) = apply { this.hoverAction = HoverAction.ShowText(text.joinToString(separator = "\n")) }

@@ -10,6 +10,7 @@ import net.minepact.api.command.dsl.Command
 import net.minepact.api.data.repository.SyncCodeRepository
 import net.minepact.api.messages.Message
 import net.minepact.api.messages.MessageBuilder
+import net.minepact.api.messages.helper.msg
 import net.minepact.api.misc.formatDuration
 import net.minepact.api.player.discord.SyncData
 import net.minepact.api.player.discord.generateSyncCode
@@ -28,16 +29,41 @@ class SyncCommand : Command() {
                 }
                 if (SyncCodeRepository.findByUUID(player.data.uuid).get() != null) {
                     val code: String = SyncCodeRepository.findByUUID(player.data.uuid).get()!!.code
-                    player.sendMessage(MessageBuilder().append("<red>You already have a sync code! Your code is <white><click:copy_to_clipboard:$code><hover:show_text:'<gray>Click to copy'>$code</hover></click><red>!").build())
+                    player.sendMessage(msg {
+                        +"<red>You already have a sync code! Your code is "
+                        text(code) {
+                            color(0xFFFFFF)
+                            clickCopy("/sync $code")
+                            hoverText("<red>Click to copy: <white>/sync $code")
+                        }
+                        +"<red>!"
+                    })
                     return@executes Result.SUCCESS
                 }
 
                 val code: String = generateSyncCode()
-
-                player.sendMessage("")
-                player.sendMessage(MessageBuilder().append("<green>Your sync code is <white><click:copy_to_clipboard:$code><hover:show_text:'<gray>Click to copy'>$code</hover></click>").build())
-                player.sendMessage("<green>In <yellow>/discord<green>, type <yellow>/sync $code <green>to sync your accounts.")
-                player.sendMessage("")
+                player.sendMessage(msg {
+                    +"\n"
+                    +"<green>Your sync code is "
+                    text(code) {
+                        color(0xFFFFFF)
+                        clickCopy("/sync $code")
+                        hoverText("<green>Copy: <white>/sync $code")
+                    }
+                    +"\n<green>In "
+                    text("/discord") {
+                        color(0xFFFF00)
+                        clickSuggestCommand("/discord")
+                        hoverText("<green>Click for the discord link!")
+                    }
+                    +"<green>, type "
+                    text("/sync $code") {
+                        color(0xFFFFFF)
+                        clickCopy("/sync $code")
+                        hoverText("<green>Copy: <white>/sync $code")
+                    }
+                    +"<green> to sync your accounts."
+                })
 
                 SyncCodeRepository.insertWithoutUpdate(SyncData(player.data.uuid, code))
                 Result.SUCCESS
