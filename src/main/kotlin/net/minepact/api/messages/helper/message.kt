@@ -24,6 +24,8 @@ fun msg(init: MessageDsl.() -> Unit): Message = MessageBuilder().let { mb ->
 
 class MessageDsl(private val builder: MessageBuilder) {
     operator fun String.unaryPlus() { builder.append(this) }
+    operator fun String.unaryMinus() { builder.append(this+"\n") }
+
     fun text(text: String, init: ComponentDsl.() -> Unit = {}) {
         builder.append(text) { ComponentDsl(this).init() }
     }

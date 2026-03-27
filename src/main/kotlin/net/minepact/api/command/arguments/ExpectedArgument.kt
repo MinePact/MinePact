@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender
  * @property permission The permission required to use this argument.
  * @property senderFilter Whether the sender of the command can use this argument.
  * @property dynamicProvider A provider for potential values that is generated dynamically based on the sender of the command.
+ * @property consumeRemaining Whether this argument should consume all remaining tokens (greedy multi-word argument).
  *
  * @author dankenyon - 22/02/26
  */
@@ -25,5 +26,6 @@ open class ExpectedArgument(
 
     val permission: String? = null,
     val senderFilter: ((CommandSender) -> Boolean)? = null,
-    val dynamicProvider: ((CommandSender) -> List<String>)? = null
+    val dynamicProvider: ((CommandSender) -> List<String>)? = null,
+    val consumeRemaining: Boolean = false
 )

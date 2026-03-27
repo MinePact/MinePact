@@ -155,6 +155,39 @@ class CommandRegister {
                 ) return null
                 if (exp.senderFilter?.invoke(sender) == false) return null
 
+                // If this argument is marked to consume the remaining tokens, gather them and create an Argument whose value is a List
+                if (exp.consumeRemaining) {
+                    val remaining = args.slice(index until args.size)
+                    // If there are no remaining tokens and the argument is optional, call the executor directly
+                    if (remaining.isEmpty()) {
+                        if (exp.optional) return argChild.executor?.invoke(sender.asPlayer(), parsedArgs)
+                        return null
+                    }
+
+                    // For STRING input types, just use the raw tokens
+                    if (exp.inputType == net.minepact.api.command.arguments.ArgumentInputType.STRING) {
+                        val raw = remaining.joinToString(" ")
+                        val arg = Argument(raw = raw, value = remaining.toList(), type = exp.inputType)
+                        parsedArgs.add(arg)
+                        return dispatch(sender, argChild, args, args.size, parsedArgs)
+                    }
+
+                    // For other input types, attempt to parse each token using the inputType
+                    val parsedValues = mutableListOf<Any>()
+                    for (token in remaining) {
+                        val parsed = exp.inputType.parse(token) ?: run {
+                            // if any token fails to parse, treat whole argument as invalid
+                            return null
+                        }
+                        parsedValues.add(parsed)
+                    }
+
+                    val raw = remaining.joinToString(" ")
+                    val arg = Argument(raw = raw, value = parsedValues.toList(), type = exp.inputType)
+                    parsedArgs.add(arg)
+                    return dispatch(sender, argChild, args, args.size, parsedArgs)
+                }
+
                 val parsed = parseArgument(current, exp)
                 if (parsed != null) {
                     parsedArgs.add(parsed)

@@ -31,6 +31,7 @@ class CommandBuilder(private val name: String) {
         range: ArgumentRange<*> = EmptyArgumentRange(),
         senderFilter: ((CommandSender) -> Boolean)? = null,
         dynamicProvider: ((CommandSender) -> List<String>)? = null,
+        consumeRemaining: Boolean = false,
         block: CommandBuilder.() -> Unit = {}
     ) {
         val expected = ExpectedArgument(
@@ -41,7 +42,8 @@ class CommandBuilder(private val name: String) {
             range = range,
             permission = permission.node,
             senderFilter = senderFilter,
-            dynamicProvider = dynamicProvider
+            dynamicProvider = dynamicProvider,
+            consumeRemaining = consumeRemaining
         )
         val child = CommandBuilder(name).apply(block)
         children.add(

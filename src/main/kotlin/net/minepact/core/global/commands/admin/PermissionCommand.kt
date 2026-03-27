@@ -214,16 +214,16 @@ class PermissionCommand : Command() {
                             } }
                         }
                         subcommand("prefix") {
-                            argument("prefix", inputType = ArgumentInputType.STRING) { executes { sender, args ->
+                            argument("prefix", inputType = ArgumentInputType.STRING, consumeRemaining = true) { executes { sender, args ->
                                 val group: Group? = GroupRegistry.get(args[0].value as String).get()
                                 if (group == null) {
                                     sender.sendMessage("<red>The group <white>${args[0].value as String} <red>does not exist.")
                                     return@executes Result.SUCCESS
                                 }
 
-                                group.prefix = args[1].value as String
+                                group.prefix = (args[1].value as List<*>).joinToString(" ")
                                 GroupRepository.insert(group)
-                                sender.sendMessage("<green>Set the prefix of '<white>${group.name}<green>' to '<white>${args[1].value as String}<green>'.")
+                                sender.sendMessage("<green>Set the prefix of '<white>${group.name}<green>' to '<white>${(args[1].value as List<*>).joinToString(" ")}<green>'.")
                                 Result.SUCCESS
                             } }
                         }
@@ -235,9 +235,9 @@ class PermissionCommand : Command() {
                                     return@executes Result.SUCCESS
                                 }
 
-                                group.suffix = args[1].value as String
+                                group.suffix = (args[1].value as List<*>).joinToString(" ")
                                 GroupRepository.insert(group)
-                                sender.sendMessage("<green>Set the suffix of '<white>${group.name}<green>' to '<white>${args[1].value as String}<green>'.")
+                                sender.sendMessage("<green>Set the suffix of '<white>${group.name}<green>' to '<white>${(args[1].value as List<*>).joinToString(" ")}<green>'.")
                                 Result.SUCCESS
                             } }
                         }
@@ -328,10 +328,10 @@ class PermissionCommand : Command() {
                             argument("permission", inputType = ArgumentInputType.STRING) { executes { sender, args ->
                                 val target: Player = args[0].value as Player
                                 target.removePermission(
-                                    Permission(args[2].value as String),
+                                    Permission(args[1].value as String),
                                     PermissionScope.GLOBAL
                                 )
-                                sender.sendMessage("<red>Removed permission '<white>${args[2].value as String}<red>' from '<white>${target.data.name}<red>'.")
+                                sender.sendMessage("<red>Removed permission '<white>${args[1].value as String}<red>' from '<white>${target.data.name}<red>'.")
                                 Result.SUCCESS
                             } }
                         }
