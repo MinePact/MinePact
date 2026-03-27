@@ -15,6 +15,7 @@ import net.minepact.api.server.Server
 import net.minepact.core.discord.embeds.*
 import net.minepact.core.global.events.timed.*
 import kotlin.properties.Delegates
+import net.minepact.api.world.WorldManager
 
 class Main : org.bukkit.plugin.java.JavaPlugin() {
     companion object {
@@ -53,6 +54,9 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         SERVER = Server()
 
+        // Load persisted worlds so they're available when the server starts
+        WorldManager.loadAll()
+
         findCommands("net.minepact.core").forEach { COMMAND_REGISTRY.register(it) }
         findEvents("net.minepact").forEach { EVENT_REGISTRY.register(it) }
         registerConfigs("net.minepact.core.global.configs")
@@ -78,6 +82,9 @@ class Main : org.bukkit.plugin.java.JavaPlugin() {
 
         // Also register JVM shutdown hook as a fallback
         PermissionShutdownHook.register()
+
+        // Persist world metadata
+        WorldManager.saveAll()
 
         if (RESTARTING) UPDATES_WEBHOOK.sendMessage("", listOf(restartEmbed()))
         else UPDATES_WEBHOOK.sendMessage("", listOf(stopEmbed()))

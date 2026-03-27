@@ -27,6 +27,9 @@ class Position(
 
         fun spawn(world: String = "world") = Position(0.0, 64.0, 0.0, world = world)
         fun origin(world: String = "world") = Position(0.0, 0.0, 0.0, world = world)
+
+        fun fromBukkit(loc: org.bukkit.Location): Position =
+            Position(loc.x, loc.y, loc.z, loc.yaw, loc.pitch, loc.world?.name ?: "world")
     }
 
     fun asBukkitLocation(): org.bukkit.Location = org.bukkit.Location(org.bukkit.Bukkit.getWorld(world), x, y, z, yaw, pitch)
@@ -39,6 +42,8 @@ class Position(
         world: String = this.world
     ): Position = Position(x, y, z, yaw, pitch, world)
 
+    fun asMinePactWorld(): World? = WorldManager.get(world)
+
     fun distanceTo(other: Position): Double = vector.distanceTo(other.vector)
     fun distanceSquaredTo(other: Position): Double = (vector - other.vector).magnitudeSquared
     fun directionTo(other: Position): Vector = (other.vector - vector).normalized()
@@ -47,8 +52,7 @@ class Position(
     operator fun minus(offset: Vector): Position = Position(vector - offset, yaw, pitch, world)
     operator fun plus(other: Position): Position = Position(vector + other.vector, yaw, pitch, world)
 
-    fun midpointTo(other: Position): Position =
-        Position((vector + other.vector) / 2.0, world = world)
+    fun midpointTo(other: Position): Position = Position((vector + other.vector) / 2.0, world = world)
     fun isWithinRadius(other: Position, radius: Double): Boolean = distanceSquaredTo(other) <= radius * radius
     fun isSameBlock(other: Position): Boolean = blockX == other.blockX && blockY == other.blockY && blockZ == other.blockZ
     fun isSameWorld(other: Position): Boolean = world == other.world

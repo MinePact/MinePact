@@ -1,7 +1,6 @@
 package net.minepact.api.permissions
 
 import net.minepact.api.data.repository.permissions.GroupRepository
-import net.minepact.api.permissions.PermissionScope
 import java.util.concurrent.CompletableFuture
 
 object GroupRegistry {
